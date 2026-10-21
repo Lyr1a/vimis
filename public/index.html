@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>VIMIS - Quản Lý Kho & Sắp Xếp Tồn Kho Tạp Hóa Thông Minh</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --apple-bg: #F5F5F7;
+      --apple-card: #FFFFFF;
+      --apple-border: rgba(0, 0, 0, 0.08);
+      --apple-border-light: rgba(0, 0, 0, 0.05);
+      --apple-text-main: #1D1D1F;
+      --apple-text-sub: #6E6E73;
+      --apple-text-muted: #86868B;
+      --apple-dark-btn: #1D1D1F;
+      --apple-blue: #0071E3;
+      --apple-ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--apple-bg);
+      color: var(--apple-text-main);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      letter-spacing: -0.011em;
+    }
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #D1D1D6;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #8E8E93;
+    }
+    .apple-card {
+      background-color: #FFFFFF;
+      border: 1px solid var(--apple-border);
+      border-radius: 1.125rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02), 0 4px 16px rgba(0,0,0,0.025);
+      transition: all 0.25s var(--apple-ease);
+    }
+    .apple-input {
+      background-color: #FFFFFF;
+      border: 1px solid #D2D2D7;
+      border-radius: 0.75rem;
+      transition: all 0.2s var(--apple-ease);
+      font-size: 0.8125rem;
+      color: #1D1D1F;
+    }
+    .apple-input:focus {
+      border-color: #0071E3;
+      box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.12);
+      outline: none;
+    }
+    .apple-btn {
+      transition: transform 0.15s var(--apple-ease), background-color 0.15s ease, opacity 0.15s ease;
+      user-select: none;
+    }
+    .apple-btn:active {
+      transform: scale(0.97);
+    }
+    .apple-btn-dark {
+      background-color: #1D1D1F;
+      color: #FFFFFF;
+      border-radius: 0.75rem;
+    }
+    .apple-btn-dark:hover {
+      background-color: #323236;
+    }
+    .apple-btn-secondary {
+      background-color: #F2F2F7;
+      color: #1D1D1F;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      border-radius: 0.75rem;
+    }
+    .apple-btn-secondary:hover {
+      background-color: #E5E5EA;
+    }
+    .apple-badge-safe {
+      background-color: #EAF7ED;
+      color: #1E7E34;
+      border: 1px solid #C6ECCB;
+    }
+    .apple-badge-warning {
+      background-color: #FFF9EB;
+      color: #B76E00;
+      border: 1px solid #FFE8B3;
+    }
+    .apple-badge-danger {
+      background-color: #FDF2F2;
+      color: #C53030;
+      border: 1px solid #FAD2D2;
+    }
+    .apple-badge-neutral {
+      background-color: #F2F2F7;
+      color: #3A3A3C;
+      border: 1px solid #E5E5EA;
+    }
+    .sidebar-active {
+      background-color: #27272A !important;
+      color: #FFFFFF !important;
+      font-weight: 600;
+    }
+    @keyframes appleFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .subview:not(.hidden) {
+      animation: appleFadeIn 0.22s var(--apple-ease) forwards;
+    }
+  </style>
+</head>
+<body class="h-full flex flex-col antialiased selection:bg-slate-200 overflow-hidden">
+
+  <!-- ================= NOTIFICATION TOAST (Apple Minimalist) ================= -->
+  <div id="toast" class="fixed top-5 right-5 z-50 transform transition-all duration-300 translate-y-[-100px] opacity-0 pointer-events-none flex items-center gap-3 bg-[#1D1D1F]/90 text-white backdrop-blur-xl px-4 py-3 rounded-2xl shadow-2xl border border-white/10 max-w-sm">
+    <div id="toast-icon" class="w-6 h-6 rounded-full bg-white/20 text-white flex items-center justify-center font-bold text-xs shrink-0">✓</div>
+    <div class="flex-1 min-w-0">
+      <div id="toast-title" class="font-semibold text-xs tracking-tight truncate">Thông báo</div>
+      <div id="toast-msg" class="text-[11px] text-[#A1A1A6] truncate">Thao tác thành công</div>
+    </div>
+  </div>
+
+  <!-- ================= SCREEN: LOGIN ================= -->
+  <div id="screen-login" class="screen-view h-full flex items-center justify-center p-4 bg-[#F5F5F7] overflow-y-auto">
+    <div class="w-full max-w-sm apple-card p-7 sm:p-8 border border-black/[0.08] shadow-xl">
+      <div class="text-center mb-6">
+        <div class="w-12 h-12 bg-[#1D1D1F] text-white rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-sm text-lg font-bold">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m4 4v10M4 7v10l8 4"/></svg>
+        </div>
+        <h1 class="text-xl font-bold text-[#1D1D1F] tracking-tight">VIMIS Tạp Hóa</h1>
+        <p class="text-xs text-[#86868B] mt-1 font-normal">Hệ thống quản lý kho & bán hàng trừ kho FEFO</p>
+      </div>
+
+      <form onsubmit="handleLogin(event)" class="space-y-3.5">
+        <div>
+          <label class="block text-[11px] font-semibold text-[#86868B] uppercase tracking-wider mb-1">Tài khoản</label>
+          <input type="text" id="login-username" value="" required placeholder="admin hoặc thungan" autocomplete="username"
+                 class="w-full px-3.5 py-2.5 apple-input text-xs text-[#1D1D1F]">
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-[11px] font-semibold text-[#86868B] uppercase tracking-wider">Mật khẩu</label>
+            <span class="text-[10px] text-[#86868B]">admin123 / 123456</span>
+          </div>
+          <input type="password" id="login-password" value="" required placeholder="Nhập mật khẩu..." autocomplete="current-password"
+                 class="w-full px-3.5 py-2.5 apple-input text-xs text-[#1D1D1F]">
+        </div>
+
+        <button type="submit" class="w-full py-2.5 px-4 apple-btn apple-btn-dark font-medium text-xs shadow-sm flex items-center justify-center gap-2 mt-4">
+          <span>Đăng nhập hệ thống</span>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </button>
+      </form>
+
+      <div class="mt-6 pt-5 border-t border-[#E5E5EA]">
+        <p class="text-[11px] text-[#86868B] text-center mb-2.5 font-medium">Chọn nhanh vai trò:</p>
+        <div class="grid grid-cols-2 gap-2">
+          <button type="button" onclick="quickFillLogin('admin', 'admin123')" class="apple-btn p-2.5 rounded-xl border border-[#E5E5EA] bg-[#F9F9FA] hover:bg-[#F2F2F7] text-left transition text-xs">
+            <div class="font-bold text-[#1D1D1F] flex items-center gap-1.5">👑 Chủ tiệm</div>
+            <div class="text-[10px] text-[#86868B] mt-0.5">Toàn quyền kho & bán</div>
+          </button>
+          <button type="button" onclick="quickFillLogin('thungan', '123456')" class="apple-btn p-2.5 rounded-xl border border-[#E5E5EA] bg-[#F9F9FA] hover:bg-[#F2F2F7] text-left transition text-xs">
+            <div class="font-bold text-[#1D1D1F] flex items-center gap-1.5">🛒 Thu ngân</div>
+            <div class="text-[10px] text-[#86868B] mt-0.5">Quét mã & Bán POS</div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MAIN APP LAYOUT ================= -->
+  <div id="app-layout" class="screen-view hidden h-full flex flex-col overflow-hidden">
+    
+    <!-- ================= TOP HEADER (Apple Responsive Minimalist) ================= -->
+    <header class="h-14 bg-white/80 backdrop-blur-xl border-b border-black/[0.06] px-3 sm:px-6 flex items-center justify-between shrink-0 select-none z-30">
+      
+      <!-- Left: Mobile Menu Button & Brand -->
+      <div class="flex items-center gap-2.5">
+        <button onclick="toggleMobileSidebar()" class="md:hidden p-2 text-[#1D1D1F] hover:bg-black/[0.05] rounded-xl transition apple-btn" title="Menu">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+
+        <div class="flex items-center gap-2 cursor-pointer" onclick="switchScreen('dashboard')">
+          <div class="w-7 h-7 rounded-lg bg-[#1D1D1F] text-white flex items-center justify-center font-bold text-xs shadow-xs">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m4 4v10M4 7v10l8 4"/></svg>
+          </div>
+          <div>
+            <div class="font-bold text-[#1D1D1F] text-xs sm:text-sm tracking-tight leading-tight">VIMIS</div>
+            <div class="text-[9px] sm:text-[10px] text-[#86868B] hidden sm:block">Quản Lý Thùng Hàng • FEFO • POS Trừ Kho</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Action Buttons & User Profile -->
+      <div class="flex items-center gap-1.5 sm:gap-2.5">
+        <!-- Quick POS Checkout Button -->
+        <button onclick="switchScreen('pos')" class="apple-btn flex items-center gap-1.5 px-3 py-1.5 apple-btn-dark text-xs font-semibold shadow-xs">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+          <span class="hidden sm:inline">Quét mã & Bán lẻ (POS)</span>
+          <span class="sm:hidden">POS</span>
+        </button>
+
+        <!-- Quick Stock In -->
+        <button onclick="switchScreen('stock-in')" class="apple-btn hidden sm:flex items-center gap-1.5 px-3 py-1.5 apple-btn-secondary text-xs font-semibold">
+          <span>+ Nhập kho</span>
+        </button>
+
+        <!-- AI Assistant Button -->
+        <button onclick="openAiCopilotModal()" class="apple-btn hidden lg:flex items-center gap-1.5 px-3 py-1.5 apple-btn-secondary text-xs font-semibold text-[#1D1D1F]">
+          <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.857L13 21l-2.286-6.857L5 12l5.714-2.857L13 3z"/></svg>
+          <span>AI Kho</span>
+        </button>
+
+        <!-- Alert Bell -->
+        <button onclick="switchScreen('alerts')" class="apple-btn relative p-2 text-[#1D1D1F] hover:bg-black/[0.05] rounded-xl transition" title="Cảnh báo tồn kho & Cận date">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          <span id="header-alert-badge" class="hidden absolute top-1.5 right-1.5 w-2 h-2 bg-[#FF3B30] rounded-full ring-2 ring-white"></span>
+        </button>
+
+        <!-- User Profile Pill -->
+        <div class="flex items-center gap-1.5 pl-1.5 border-l border-black/[0.08]">
+          <div class="w-7 h-7 rounded-full bg-[#E5E5EA] text-[#1D1D1F] flex items-center justify-center font-bold text-xs shrink-0" id="user-avatar">
+            AD
+          </div>
+          <div class="hidden xl:block text-left text-xs leading-tight">
+            <div class="font-semibold text-[#1D1D1F] truncate max-w-[120px]" id="user-display-name">Chủ Tiệm</div>
+            <div class="text-[10px] text-[#86868B]" id="user-display-role">admin</div>
+          </div>
+          <button onclick="handleLogout()" title="Đăng xuất" class="apple-btn p-1.5 text-[#86868B] hover:text-[#FF3B30] hover:bg-black/[0.05] rounded-lg transition ml-0.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- ================= BODY (RESPONSIVE SIDEBAR + MAIN CONTENT) ================= -->
+    <div class="flex-1 flex overflow-hidden relative">
+      
+      <!-- Backdrop for Mobile Sidebar -->
+      <div id="sidebar-backdrop" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-black/40 backdrop-blur-xs z-35 hidden md:hidden transition-opacity"></div>
+
+      <!-- ================= SIDEBAR (Apple Dark Graphite) ================= -->
+      <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-[#161617] text-[#A1A1A6] flex flex-col border-r border-[#27272A] select-none shrink-0 transition-transform duration-300 -translate-x-full md:relative md:translate-x-0 md:z-20">
+        
+        <!-- Mobile close button -->
+        <div class="md:hidden p-3 flex justify-between items-center border-b border-[#27272A]">
+          <span class="text-xs font-semibold text-white">Menu Điều Hướng</span>
+          <button onclick="toggleMobileSidebar()" class="p-1 text-[#86868B] hover:text-white">✕</button>
+        </div>
+
+        <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
+          
+          <button onclick="switchScreen('dashboard'); closeMobileSidebarIfOpen();" class="apple-btn sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium hover:text-white hover:bg-[#27272A]/60 transition" data-menu="dashboard">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+            <span>Tổng quan kho</span>
+          </button>
+
+          <!-- POS CHECKOUT HIGHLIGHT -->
+          <button onclick="switchScreen('pos'); closeMobileSidebarIfOpen();" class="apple-btn sidebar-item w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-white bg-white/10 hover:bg-white/15 transition" data-menu="pos">
+            <div class="flex items-center gap-3">
+              <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+              <span>Quét mã & Bán (POS)</span>
+            </div>
+            <span class="text-[9px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-1.5 py-0.2 rounded font-mono">Tự trừ kho</span>
+          </button>
+
+          <button onclick="switchScreen('inventory'); closeMobileSidebarIfOpen();" class="apple-btn sidebar-item w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium hover:text-white hover:bg-[#27272A]/60 transition" data-menu="inventory">
+            <div class="flex items-center gap-3">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+              <span>Kiểm kê & Lô/Thùng</span>
+            </div>
+            <span id="menu-batch-count" class="text-[10px] bg-[#27272A] text-white/80 px-1.5 py-0.2 rounded font-mono">0</span>
+          </button>
+
+          <button onclick="switchScreen('products'); closeMobileSidebarIfOpen();" class="apple-btn sidebar-item w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium hover:text-white hover:bg-[#27272A]/60 transition" data-menu="products">
+            <div class="flex items-center gap-3">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M7 7h.01M7 3h5a2 2 0 011.414.586l7 7a2 2 0 010 2.828l-5 5a2 2 0 01-2.828 0l-7-7A2 2 0 013 10V5a2 2 0 012-2z"/></svg>
+              <span>Danh mục hàng & ABC</span>
+            </div>
+            <span id="menu-product-count" class="text-[10px] bg-[#27272A] text-white/80 px-1.5 py-0.2 rounded font-mono">0</span>
+          </button>
+
+          <div class="text-[10px] font-semibold text-[#636366] uppercase tracking-wider px-3 pt-3 pb-1">Vận hành kho hàng</div>
+
+          <button onclick="switchScreen('stock-in'); closeMobileSidebarIfOpen();" class="apple-btn sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium hover:text-white hover:bg-[#27272A]/60 transition" data-menu="stock-in">
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+            <span>Nhập hàng vào kho</span>
+          </button>
+
+          <button onclick="switchScreen('stock-out'); closeMobileSidebarIfOpen();" class="apple-btn sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium hover:text-white hover:bg-[#27272A]/60 transition" data-menu="stock-out">
+            <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+            <span>Xuất kho & Hủy hàng</span>
+          </button>
+
+          <button onclick="switchScreen('alerts'); closeMobileSidebarIfOpen();" class="apple-btn sidebar-item w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium hover:text-white hover:bg-[#27272A]/60 transition" data-menu="alerts">
+            <div class="flex items-center gap-3">
+              <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+              <span>Cảnh báo Thùng & Hạn dùng</span>
+            </div>
+            <span id="menu-alert-badge" class="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-[#FF3B30] text-white">0</span>
+          </button>
+
+          <button onclick="switchScreen('transactions'); closeMobileSidebarIfOpen();" class="apple-btn sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium hover:text-white hover:bg-[#27272A]/60 transition" data-menu="transactions">
+            <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span>Nhật ký biến động kho</span>
+          </button>
+
+          <div class="text-[10px] font-semibold text-[#636366] uppercase tracking-wider px-3 pt-3 pb-1">Báo cáo & Phân quyền</div>
+
+          <button onclick="switchScreen('reports'); closeMobileSidebarIfOpen();" class="apple-btn sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium hover:text-white hover:bg-[#27272A]/60 transition" data-menu="reports">
+            <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            <span>Báo cáo Xuất - Nhập - Tồn</span>
+          </button>
+
+          <button onclick="switchScreen('users'); closeMobileSidebarIfOpen();" class="apple-btn sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium hover:text-white hover:bg-[#27272A]/60 transition" data-menu="users">
+            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M8.5 11a4 4 0 100-8 4 4 0 000 8zm11 10v-2a4 4 0 00-3-3.87m-4-12a4 4 0 010 7.75"/></svg>
+            <span>Nhân viên quản kho</span>
+          </button>
+
+        </nav>
+
+        <div class="p-3 border-t border-[#27272A] text-[10px] text-[#636366] text-center font-mono">
+          VIMIS Tiệm Tạp Hóa • v3.0
+        </div>
+      </aside>
+
+      <!-- ================= MAIN CONTENT AREA ================= -->
+      <main class="flex-1 overflow-y-auto p-3 sm:p-5 lg:p-6 bg-[#F5F5F7] min-w-0">
+
+        <!-- ================= VIEW 1: DASHBOARD ================= -->
+        <div id="view-dashboard" class="subview space-y-4 sm:space-y-5">
+          
+          <!-- Apple Minimal Hero Header -->
+          <div class="apple-card p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3.5">
+            <div class="space-y-1 min-w-[240px]">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#F2F2F7] text-[#1D1D1F] border border-[#E5E5EA]">Trợ Lý Quản Trị Kho 5S • FEFO</span>
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              </div>
+              <h2 class="text-sm sm:text-base md:text-lg font-bold text-[#1D1D1F] tracking-tight">Tối ưu hóa sắp xếp thùng hàng & Bán hàng trừ kho tự động</h2>
+              <p id="dashboard-ai-summary" class="text-xs text-[#86868B] max-w-2xl leading-relaxed">
+                Đang phân tích dữ liệu kho thực tế...
+              </p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="switchScreen('pos')" class="apple-btn px-3.5 py-2 apple-btn-dark font-medium text-xs shadow-xs flex items-center gap-1.5">
+                <span>🛒 Mở Quầy Bán (POS)</span>
+              </button>
+              <button onclick="openAiCopilotModal()" class="apple-btn px-3 py-2 apple-btn-secondary font-medium text-xs flex items-center gap-1.5">
+                <span>✨ AI Gợi Ý</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Key Metrics Grid -->
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
+            <div class="apple-card p-3.5 sm:p-4">
+              <div class="text-[11px] text-[#86868B] font-medium">Tổng mặt hàng</div>
+              <div id="stat-total-sku" class="text-lg sm:text-2xl font-bold text-[#1D1D1F] mt-1">--</div>
+              <div class="text-[10px] text-[#86868B] mt-1 truncate" id="stat-class-a">-- Hàng nhóm A</div>
+            </div>
+
+            <div class="apple-card p-3.5 sm:p-4">
+              <div class="text-[11px] text-[#86868B] font-medium">Tổng tồn kho</div>
+              <div id="stat-total-units" class="text-lg sm:text-2xl font-bold text-[#1D1D1F] mt-1">--</div>
+              <div class="text-[10px] text-[#86868B] mt-1 truncate" id="stat-total-batches">-- Lô/thùng hàng</div>
+            </div>
+
+            <div class="apple-card p-3.5 sm:p-4">
+              <div class="text-[11px] text-[#86868B] font-medium">Giá trị vốn hàng tồn</div>
+              <div id="stat-total-value" class="text-lg sm:text-2xl font-bold text-[#1D1D1F] mt-1 truncate">-- đ</div>
+              <div class="text-[10px] text-emerald-600 mt-1 truncate" id="stat-sale-value">Doanh thu dự kiến: --</div>
+            </div>
+
+            <div class="apple-card p-3.5 sm:p-4">
+              <div class="text-[11px] text-[#86868B] font-medium">Cảnh báo thiếu & Cận date</div>
+              <div class="flex items-center gap-1.5 mt-1">
+                <span id="stat-alert-count" class="text-lg sm:text-2xl font-bold text-[#FF3B30]">0</span>
+                <span class="text-[11px] text-[#86868B]">thiếu</span>
+                <span class="text-[11px] text-[#86868B]">•</span>
+                <span id="stat-expiring-count" class="text-lg sm:text-2xl font-bold text-[#B76E00]">0</span>
+                <span class="text-[11px] text-[#86868B]">cận date</span>
+              </div>
+              <div class="text-[10px] text-[#86868B] mt-1 truncate">Ưu tiên bán theo FEFO</div>
+            </div>
+          </div>
+
+          <!-- Two Column Lists: Need Reorder & Expiring Soon -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-3.5 sm:gap-4">
+            
+            <!-- Expiring Soon Boxes (FEFO) -->
+            <div class="apple-card p-4 sm:p-5 space-y-3">
+              <div class="flex items-center justify-between border-b border-black/[0.06] pb-3">
+                <div class="flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                  <h3 class="text-xs font-bold text-[#1D1D1F] uppercase tracking-wider">Thùng hàng cận hạn cần bán trước (FEFO)</h3>
+                </div>
+                <button onclick="switchScreen('alerts')" class="text-[11px] text-[#0071E3] font-semibold hover:underline">
+                  Xem tất cả →
+                </button>
+              </div>
+              <div id="dashboard-expiring-list" class="space-y-2">
+                <div class="text-xs text-[#86868B] py-4 text-center">Đang kiểm tra hạn sử dụng các thùng hàng...</div>
+              </div>
+            </div>
+
+            <!-- Low Stock Items -->
+            <div class="apple-card p-4 sm:p-5 space-y-3">
+              <div class="flex items-center justify-between border-b border-black/[0.06] pb-3">
+                <div class="flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                  <h3 class="text-xs font-bold text-[#1D1D1F] uppercase tracking-wider">Mặt hàng chạm ngưỡng thiếu cần nhập</h3>
+                </div>
+                <button onclick="switchScreen('alerts')" class="text-[11px] text-[#0071E3] font-semibold hover:underline">
+                  Xem tất cả →
+                </button>
+              </div>
+              <div id="dashboard-low-stock-list" class="space-y-2">
+                <div class="text-xs text-[#86868B] py-4 text-center">Đang kiểm tra số lượng tồn kho...</div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Recent Activity Table -->
+          <div class="apple-card p-4 sm:p-5 space-y-3">
+            <div class="flex items-center justify-between border-b border-black/[0.06] pb-3">
+              <h3 class="text-xs font-bold text-[#1D1D1F] uppercase tracking-wider">Nhật ký biến động xuất - nhập - bán hàng mới nhất</h3>
+              <button onclick="switchScreen('transactions')" class="text-[11px] text-[#0071E3] font-semibold hover:underline">
+                Xem toàn bộ lịch sử →
+              </button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs min-w-[550px]">
+                <thead>
+                  <tr class="text-[#86868B] border-b border-black/[0.06]">
+                    <th class="py-2 px-3 font-medium">Thời gian</th>
+                    <th class="py-2 px-3 font-medium">Loại GD</th>
+                    <th class="py-2 px-3 font-medium">Mặt hàng</th>
+                    <th class="py-2 px-3 font-medium text-center">Thay đổi</th>
+                    <th class="py-2 px-3 font-medium text-center">Tồn sau</th>
+                    <th class="py-2 px-3 font-medium">Ghi chú & Thùng xuất</th>
+                  </tr>
+                </thead>
+                <tbody id="dashboard-recent-tx-body">
+                  <tr><td colspan="6" class="text-center py-4 text-[#86868B]">Đang tải...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ================= VIEW 2: POS CHECKOUT ================= -->
+        <div id="view-pos" class="subview hidden space-y-4">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            
+            <!-- Left: Barcode Scanner & Product Catalog (7 cols on desktop) -->
+            <div class="lg:col-span-7 space-y-3.5">
+              
+              <!-- Barcode Scanner Input Bar -->
+              <div class="apple-card p-3.5 sm:p-4 space-y-2.5">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-[#1D1D1F] uppercase tracking-wider flex items-center gap-1.5">
+                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                    <span>Quét mã vạch bán hàng</span>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] apple-badge-safe font-semibold">Tự trừ kho</span>
+                  </span>
+                  <span class="text-[10px] sm:text-[11px] text-[#86868B]">Máy quét hoặc phím Enter</span>
+                </div>
+                <div class="relative">
+                  <input type="text" id="pos-barcode-input" autofocus
+                         placeholder="Quét mã vạch hoặc gõ tên/SKU/Barcode rồi bấm Enter..."
+                         onkeydown="handlePosBarcodeInput(event)"
+                         class="w-full pl-9 pr-20 py-2.5 apple-input text-xs font-mono font-semibold text-[#1D1D1F]">
+                  <svg class="w-4 h-4 text-[#86868B] absolute left-3 top-3" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                  <button type="button" onclick="triggerBarcodeSubmit()" class="apple-btn absolute right-1.5 top-1.5 px-3 py-1.5 apple-btn-dark text-[11px] font-semibold">
+                    + Thêm
+                  </button>
+                </div>
+              </div>
+
+              <!-- Quick Select Product Grid -->
+              <div class="apple-card p-3.5 sm:p-4 space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <div class="text-xs font-bold text-[#1D1D1F] uppercase tracking-wider">Chọn nhanh từ danh mục</div>
+                  <!-- Category filter pills -->
+                  <div class="flex flex-wrap gap-1" id="pos-cat-filter-container">
+                    <button onclick="filterPosCatalog('ALL')" class="pos-cat-btn apple-btn px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-[#1D1D1F] text-white">Tất cả</button>
+                    <button onclick="filterPosCatalog('Thực phẩm khô')" class="pos-cat-btn apple-btn px-2.5 py-1 rounded-lg text-[11px] font-medium bg-[#F2F2F7] text-[#1D1D1F] hover:bg-[#E5E5EA]">Mì & Gạo</button>
+                    <button onclick="filterPosCatalog('Bia & Nước ngọt')" class="pos-cat-btn apple-btn px-2.5 py-1 rounded-lg text-[11px] font-medium bg-[#F2F2F7] text-[#1D1D1F] hover:bg-[#E5E5EA]">Bia & Nước</button>
+                    <button onclick="filterPosCatalog('Gia vị & Dầu ăn')" class="pos-cat-btn apple-btn px-2.5 py-1 rounded-lg text-[11px] font-medium bg-[#F2F2F7] text-[#1D1D1F] hover:bg-[#E5E5EA]">Gia vị</button>
+                    <button onclick="filterPosCatalog('Bánh kẹo & Sữa')" class="pos-cat-btn apple-btn px-2.5 py-1 rounded-lg text-[11px] font-medium bg-[#F2F2F7] text-[#1D1D1F] hover:bg-[#E5E5EA]">Bánh kẹo</button>
+                    <button onclick="filterPosCatalog('Hóa mỹ phẩm')" class="pos-cat-btn apple-btn px-2.5 py-1 rounded-lg text-[11px] font-medium bg-[#F2F2F7] text-[#1D1D1F] hover:bg-[#E5E5EA]">Hóa mỹ phẩm</button>
+                  </div>
+                </div>
+
+                <!-- Product Cards Grid -->
+                <div id="pos-catalog-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-[460px] overflow-y-auto pr-1">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Right: POS Shopping Cart & Instant Checkout (5 cols on desktop) -->
+            <div class="lg:col-span-5 space-y-4">
+              <div class="apple-card p-4 sm:p-5 space-y-4 flex flex-col justify-between">
+                
+                <div>
+                  <div class="flex items-center justify-between pb-3 border-b border-black/[0.06]">
+                    <div>
+                      <h3 class="text-sm font-bold text-[#1D1D1F]">Giỏ hàng thanh toán</h3>
+                      <p class="text-[11px] text-[#86868B]">Khách lẻ mua tại tiệm</p>
+                    </div>
+                    <button onclick="clearPosCart()" class="text-[11px] text-[#FF3B30] hover:underline font-medium">
+                      Xóa giỏ
+                    </button>
+                  </div>
+
+                  <!-- Cart Items List -->
+                  <div id="pos-cart-items" class="divide-y divide-black/[0.05] max-h-[300px] overflow-y-auto pr-1 my-2">
+                    <div class="py-8 text-center text-xs text-[#86868B]">
+                      Chưa có sản phẩm nào. Hãy quét mã vạch hoặc bấm chọn sản phẩm!
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Payment Details Section -->
+                <div class="space-y-3 pt-3 border-t border-black/[0.06]">
+                  
+                  <!-- FEFO Note -->
+                  <div class="p-2.5 rounded-xl bg-[#F2F2F7] text-[11px] text-[#3A3A3C] flex items-center justify-between">
+                    <span class="flex items-center gap-1.5 font-medium">
+                      <span>⚡ Quy tắc kho:</span>
+                      <span>FEFO tự động</span>
+                    </span>
+                    <span class="text-[#86868B]">Trừ thùng hạn gần nhất trước</span>
+                  </div>
+
+                  <!-- Payment Method -->
+                  <div class="grid grid-cols-2 gap-2">
+                    <button type="button" id="pos-pm-cash" onclick="setPosPaymentMethod('CASH')" class="apple-btn py-2 px-3 rounded-xl border text-xs font-semibold bg-[#1D1D1F] text-white">
+                      💵 Tiền mặt
+                    </button>
+                    <button type="button" id="pos-pm-transfer" onclick="setPosPaymentMethod('TRANSFER')" class="apple-btn py-2 px-3 rounded-xl border border-[#E5E5EA] bg-[#F9F9FA] text-[#1D1D1F] text-xs font-semibold hover:bg-[#F2F2F7]">
+                      📱 Chuyển khoản QR
+                    </button>
+                  </div>
+
+                  <!-- Amount Inputs -->
+                  <div class="space-y-2">
+                    <div class="flex items-center justify-between text-xs">
+                      <span class="text-[#86868B]">Tổng tiền hàng:</span>
+                      <span id="pos-total-amount" class="text-base font-bold text-[#1D1D1F]">0 đ</span>
+                    </div>
+
+                    <div class="flex items-center justify-between text-xs">
+                      <span class="text-[#86868B]">Tiền khách đưa:</span>
+                      <div class="w-32 sm:w-36">
+                        <input type="number" id="pos-received-amount" min="0" step="1000" placeholder="0"
+                               oninput="calculatePosChange()"
+                               class="w-full text-right px-2.5 py-1.5 apple-input text-xs font-bold font-mono">
+                      </div>
+                    </div>
+
+                    <div class="flex items-center justify-between text-xs">
+                      <span class="text-[#86868B]">Tiền thối lại:</span>
+                      <span id="pos-change-amount" class="font-bold text-[#0071E3] font-mono text-sm">0 đ</span>
+                    </div>
+                  </div>
+
+                  <!-- Complete Checkout Button -->
+                  <button type="button" onclick="handlePosCheckout()" class="apple-btn w-full py-3 apple-btn-dark font-bold text-xs shadow-sm flex items-center justify-center gap-2">
+                    <span>⚡ Thanh toán & Tự động trừ kho</span>
+                    <span class="text-[10px] text-white/60 font-mono">(F9)</span>
+                  </button>
+
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ================= VIEW 3: INVENTORY & MULTI-BOX BATCHES ================= -->
+        <div id="view-inventory" class="subview hidden space-y-4">
+          
+          <!-- Summary Cards -->
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
+            <div class="apple-card p-3.5 sm:p-4">
+              <div class="text-[11px] text-[#86868B] font-medium">Tồn an toàn</div>
+              <div id="inv-safe-count" class="text-lg sm:text-xl font-bold text-emerald-700 mt-1">-- Mặt hàng</div>
+            </div>
+            <div class="apple-card p-3.5 sm:p-4">
+              <div class="text-[11px] text-[#86868B] font-medium">Thùng cận hạn (<= 45 ngày)</div>
+              <div id="inv-expiring-count" class="text-lg sm:text-xl font-bold text-amber-700 mt-1">-- Thùng</div>
+            </div>
+            <div class="apple-card p-3.5 sm:p-4">
+              <div class="text-[11px] text-[#86868B] font-medium">Thùng đã hết hạn</div>
+              <div id="inv-expired-count" class="text-lg sm:text-xl font-bold text-rose-700 mt-1">-- Thùng</div>
+            </div>
+            <div class="apple-card p-3.5 sm:p-4">
+              <div class="text-[11px] text-[#86868B] font-medium">Mặt hàng thiếu tồn</div>
+              <div id="inv-danger-count" class="text-lg sm:text-xl font-bold text-rose-700 mt-1">-- Mặt hàng</div>
+            </div>
+          </div>
+
+          <!-- Dedicated Independent Toolbar with Time & Expiry Filters -->
+          <div class="apple-card p-3.5 sm:p-4 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2.5">
+              
+              <!-- Independent Search Input (Strictly Inventory & Batches) -->
+              <div class="relative flex-1 min-w-[200px] max-w-sm">
+                <input type="text" id="inv-search" oninput="loadInventory()"
+                       placeholder="Tìm tồn kho theo tên, SKU, barcode, kệ, mã thùng..."
+                       class="w-full pl-9 pr-3 py-2 apple-input text-xs text-[#1D1D1F]">
+                <svg class="w-4 h-4 text-[#86868B] absolute left-3 top-2.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              </div>
+
+              <!-- Filter 1: Thời gian Nhập hàng -->
+              <div class="flex items-center gap-1.5">
+                <span class="text-[11px] font-semibold text-[#86868B] hidden sm:inline">Ngày nhập:</span>
+                <select id="inv-filter-import" onchange="loadInventory()" class="apple-input text-xs py-1.5 px-2.5 text-[#1D1D1F] bg-white">
+                  <option value="ALL">Tất cả ngày nhập</option>
+                  <option value="TODAY">Mới nhập hôm nay</option>
+                  <option value="WEEK">Mới nhập tuần này (7 ngày)</option>
+                  <option value="MONTH">Mới nhập tháng này (30 ngày)</option>
+                  <option value="OLDER">Nhập trước đó (> 30 ngày)</option>
+                </select>
+              </div>
+
+              <!-- Filter 2: Hạn sử dụng (FEFO Filter) -->
+              <div class="flex items-center gap-1.5">
+                <span class="text-[11px] font-semibold text-[#86868B] hidden sm:inline">Hạn dùng:</span>
+                <select id="inv-filter-expiry" onchange="loadInventory()" class="apple-input text-xs py-1.5 px-2.5 text-[#1D1D1F] bg-white">
+                  <option value="ALL">Tất cả hạn dùng</option>
+                  <option value="SAFE">Còn hạn an toàn (> 45 ngày)</option>
+                  <option value="EXPIRING_SOON">Sắp hết hạn (<= 45 ngày)</option>
+                  <option value="CRITICAL">Cận date nguy cấp (<= 15 ngày)</option>
+                  <option value="EXPIRED">Đã hết hạn (<= 0 ngày)</option>
+                </select>
+              </div>
+
+              <!-- Filter 3: Khu vực kệ -->
+              <select id="inv-filter-zone" onchange="loadInventory()" class="apple-input text-xs py-1.5 px-2.5 text-[#1D1D1F] bg-white">
+                <option value="ALL">Tất cả vị trí kệ</option>
+                <option value="Kệ mì">Kệ mì ăn liền</option>
+                <option value="Kho bia">Kho bia & nước</option>
+                <option value="Tủ mát">Tủ mát trước tiệm</option>
+                <option value="Kệ gia vị">Kệ gia vị & dầu ăn</option>
+                <option value="Kệ sữa">Kệ sữa & bánh kẹo</option>
+                <option value="Kệ hóa mỹ phẩm">Kệ hóa mỹ phẩm</option>
+                <option value="Khu vực bao gạo">Khu vực bao gạo</option>
+              </select>
+
+              <!-- Add Batch Button -->
+              <button onclick="openBatchModal()" class="apple-btn px-3 py-1.5 apple-btn-dark text-xs font-semibold flex items-center gap-1.5 shadow-xs">
+                <span>+ Thêm Thùng</span>
+              </button>
+
+            </div>
+          </div>
+
+          <!-- Inventory & Multi-Box Table -->
+          <div class="apple-card overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs min-w-[700px]">
+                <thead>
+                  <tr class="bg-[#F9F9FA] text-[#86868B] border-b border-black/[0.06]">
+                    <th class="py-3 px-4 font-semibold text-center w-12">ABC</th>
+                    <th class="py-3 px-4 font-semibold">Tên sản phẩm & SKU</th>
+                    <th class="py-3 px-4 font-semibold">Vị trí kệ</th>
+                    <th class="py-3 px-4 font-semibold text-center">Phân loại Thùng hàng & HSD</th>
+                    <th class="py-3 px-4 font-semibold text-center">Tổng tồn kho</th>
+                    <th class="py-3 px-4 font-semibold text-center">Min-Max</th>
+                    <th class="py-3 px-4 font-semibold text-center">Trạng thái</th>
+                    <th class="py-3 px-4 font-semibold text-center">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="inventory-table-body" class="divide-y divide-black/[0.05]">
+                  <tr><td colspan="8" class="text-center py-8 text-[#86868B]">Đang tải dữ liệu tồn kho...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ================= VIEW 4: PRODUCTS & ABC MODULE ================= -->
+        <div id="view-products" class="subview hidden space-y-4">
+          
+          <div class="apple-card p-3.5 sm:p-4 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-2.5 flex-1 min-w-[240px]">
+              
+              <!-- Independent Search Input (Strictly Products) -->
+              <div class="relative flex-1 min-w-[180px] max-w-sm">
+                <input type="text" id="prod-search" oninput="loadProducts()"
+                       placeholder="Tìm mặt hàng theo tên, SKU, barcode..."
+                       class="w-full pl-9 pr-3 py-2 apple-input text-xs text-[#1D1D1F]">
+                <svg class="w-4 h-4 text-[#86868B] absolute left-3 top-2.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              </div>
+
+              <!-- ABC Filter -->
+              <select id="prod-filter-abc" onchange="loadProducts()" class="apple-input text-xs py-2 px-3 text-[#1D1D1F] bg-white">
+                <option value="ALL">Tất cả nhóm ABC</option>
+                <option value="A">⭐ Nhóm A (Bán chạy)</option>
+                <option value="B">🔹 Nhóm B (Bán vừa)</option>
+                <option value="C">🔸 Nhóm C (Bán chậm)</option>
+              </select>
+
+              <!-- Category Filter -->
+              <select id="prod-filter-cat" onchange="loadProducts()" class="apple-input text-xs py-2 px-3 text-[#1D1D1F] bg-white">
+                <option value="ALL">Tất cả ngành hàng</option>
+                <option value="Thực phẩm khô">Thực phẩm khô</option>
+                <option value="Bia & Nước ngọt">Bia & Nước ngọt</option>
+                <option value="Gia vị & Dầu ăn">Gia vị & Dầu ăn</option>
+                <option value="Bánh kẹo & Sữa">Bánh kẹo & Sữa</option>
+                <option value="Hóa mỹ phẩm">Hóa mỹ phẩm</option>
+              </select>
+
+            </div>
+
+            <button onclick="openProductModal()" class="apple-btn px-3.5 py-2 apple-btn-dark text-xs font-semibold shadow-xs flex items-center gap-1.5">
+              <span>+ Thêm mặt hàng</span>
+            </button>
+          </div>
+
+          <!-- Product Table -->
+          <div class="apple-card overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs min-w-[700px]">
+                <thead>
+                  <tr class="bg-[#F9F9FA] text-[#86868B] border-b border-black/[0.06]">
+                    <th class="py-3 px-4 font-semibold text-center w-12">ABC</th>
+                    <th class="py-3 px-4 font-semibold">SKU & Barcode</th>
+                    <th class="py-3 px-4 font-semibold">Tên hàng & Ngành</th>
+                    <th class="py-3 px-4 font-semibold">Vị trí kệ</th>
+                    <th class="py-3 px-4 font-semibold text-center">ĐVT</th>
+                    <th class="py-3 px-4 font-semibold text-right">Giá vốn</th>
+                    <th class="py-3 px-4 font-semibold text-right">Giá bán</th>
+                    <th class="py-3 px-4 font-semibold text-center">Min-Max</th>
+                    <th class="py-3 px-4 font-semibold text-center">Tổng tồn</th>
+                    <th class="py-3 px-4 font-semibold text-center">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="product-table-body" class="divide-y divide-black/[0.05]">
+                  <tr><td colspan="10" class="text-center py-8 text-[#86868B]">Đang tải danh mục sản phẩm...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ================= VIEW 5: STOCK IN MODULE ================= -->
+        <div id="view-stock-in" class="subview hidden space-y-4 max-w-3xl mx-auto">
+          <div class="flex items-center gap-2 border-b border-black/[0.06] pb-3">
+            <button id="tab-btn-single-stockin" onclick="switchStockInTab('single')" class="apple-btn px-4 py-2 rounded-xl apple-btn-dark font-bold text-xs shadow-xs transition">
+              Phiếu nhập từng món & Khai báo thùng
+            </button>
+            <button id="tab-btn-bulk-stockin" onclick="switchStockInTab('bulk')" class="apple-btn px-4 py-2 rounded-xl apple-btn-secondary text-[#1D1D1F] font-medium text-xs transition">
+              Dán danh sách nhanh (Excel / Paste)
+            </button>
+          </div>
+
+          <!-- Pane 1: Single Stock In Form -->
+          <div id="pane-stockin-single" class="apple-card p-5 sm:p-6 space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-black/[0.06]">
+              <div>
+                <h3 class="text-sm font-bold text-[#1D1D1F]">Tạo Phiếu Nhập Hàng Mới</h3>
+                <p class="text-xs text-[#86868B]">Tự động tạo Thùng hàng mới và cập nhật tồn kho</p>
+              </div>
+              <span class="px-2.5 py-1 rounded-full apple-badge-neutral text-xs font-semibold">Nhập kiểm soát</span>
+            </div>
+
+            <form onsubmit="handleStockIn(event)" class="space-y-3.5">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Nhà cung cấp / Nguồn nhập</label>
+                  <input type="text" id="stockin-supplier" value="Đại lý Phân phối Tổng hợp"
+                         class="w-full px-3 py-2 text-xs apple-input text-[#1D1D1F]">
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Kho tiếp nhận</label>
+                  <input type="text" id="stockin-warehouse" value="Kho Tiệm Tạp Hóa"
+                         class="w-full px-3 py-2 text-xs apple-input text-[#1D1D1F]">
+                </div>
+              </div>
+
+              <!-- Product Details -->
+              <div class="bg-[#F9F9FA] p-3.5 sm:p-4 rounded-xl border border-black/[0.06] space-y-3">
+                <div class="text-xs font-bold text-[#1D1D1F] uppercase tracking-wide">Chi tiết mặt hàng & Lô Thùng nhập</div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div class="sm:col-span-2">
+                    <label class="block text-xs font-medium text-[#1D1D1F] mb-1">Chọn sản phẩm <span class="text-[#FF3B30]">*</span></label>
+                    <select id="stockin-product-select" onchange="updateStockInFormFields()" class="w-full px-3 py-2 text-xs apple-input bg-white text-[#1D1D1F]">
+                      <!-- Populated by JS -->
+                    </select>
+                  </div>
+
+                  <div>
+                    <label class="block text-xs font-medium text-[#1D1D1F] mb-1">Số lượng nhập <span class="text-[#FF3B30]">*</span></label>
+                    <input type="number" id="stockin-qty" required min="1" value="10" oninput="calculateStockInTotal()"
+                           class="w-full px-3 py-2 text-xs apple-input font-bold">
+                  </div>
+
+                  <div>
+                    <label class="block text-xs font-medium text-[#1D1D1F] mb-1">Mã Thùng / Lô</label>
+                    <input type="text" id="stockin-batch-code" placeholder="Để trống tự sinh mã"
+                           class="w-full px-3 py-2 text-xs apple-input font-mono">
+                  </div>
+
+                  <div>
+                    <label class="block text-xs font-medium text-[#1D1D1F] mb-1">Hạn sử dụng</label>
+                    <input type="date" id="stockin-batch-expiry" class="w-full px-3 py-2 text-xs apple-input">
+                  </div>
+
+                  <div>
+                    <label class="block text-xs font-medium text-[#1D1D1F] mb-1">Đơn giá nhập (đ)</label>
+                    <input type="number" id="stockin-cost" required min="0" step="1000" oninput="calculateStockInTotal()"
+                           class="w-full px-3 py-2 text-xs apple-input">
+                  </div>
+                </div>
+
+                <div class="pt-2 flex items-center justify-between text-xs">
+                  <span class="text-[#86868B]">Tổng tiền nhập đợt này:</span>
+                  <span id="stockin-total-display" class="font-bold text-sm text-[#1D1D1F]">0 đ</span>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Ghi chú</label>
+                <textarea id="stockin-note" rows="2" placeholder="Ghi chú đợt hàng..."
+                          class="w-full px-3 py-2 text-xs apple-input"></textarea>
+              </div>
+
+              <div class="pt-3 border-t border-black/[0.06] flex items-center justify-end gap-2.5">
+                <button type="button" onclick="switchScreen('inventory')" class="apple-btn px-4 py-2 apple-btn-secondary text-xs font-medium">Hủy</button>
+                <button type="submit" class="apple-btn px-5 py-2 apple-btn-dark text-xs font-semibold shadow-xs flex items-center gap-1.5">
+                  <span>✓ Lưu Phiếu Nhập & Tạo Thùng</span>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Pane 2: Bulk Sync Paste -->
+          <div id="pane-stockin-bulk" class="apple-card p-5 sm:p-6 space-y-4 hidden">
+            <h3 class="text-sm font-bold text-[#1D1D1F]">Nhập hàng loạt từ danh sách dán</h3>
+            <textarea id="bulk-paste-text" rows="8" placeholder="Dán danh sách từ Excel theo định dạng: Tên sản phẩm, Số lượng, Đơn giá, Đơn vị..."
+                      class="w-full p-3 font-mono text-xs apple-input"></textarea>
+            <button type="button" onclick="handleBulkSyncPaste()" class="apple-btn px-5 py-2 apple-btn-dark text-xs font-bold shadow-xs">
+              ⚡ Nạp & Đồng bộ tồn kho ngay
+            </button>
+          </div>
+
+        </div>
+
+        <!-- ================= VIEW 6: STOCK OUT / DISPOSAL ================= -->
+        <div id="view-stock-out" class="subview hidden space-y-4 max-w-3xl mx-auto">
+          <div class="apple-card p-5 sm:p-6 space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-black/[0.06]">
+              <div>
+                <h3 class="text-sm font-bold text-[#1D1D1F]">Xuất Kho Thủ Công / Hủy Hàng Quá Hạn</h3>
+                <p class="text-xs text-[#86868B]">Giảm trừ tồn kho và lưu vết nguyên nhân xuất hàng</p>
+              </div>
+              <span class="px-2.5 py-1 rounded-full apple-badge-warning text-xs font-semibold">Xuất có lý do</span>
+            </div>
+
+            <form onsubmit="handleStockOut(event)" class="space-y-3.5">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Nơi nhận / Đơn vị tiếp nhận</label>
+                  <input type="text" id="stockout-customer" value="Quầy bán lẻ tiệm"
+                         class="w-full px-3 py-2 text-xs apple-input text-[#1D1D1F]">
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Lý do xuất kho</label>
+                  <select id="stockout-reason" class="w-full px-3 py-2 text-xs apple-input bg-white">
+                    <option value="Đưa ra quầy bán">Đưa ra quầy bán lẻ</option>
+                    <option value="Hư hỏng / Quá hạn (Hủy hàng)">Hư hỏng / Quá hạn sử dụng (Thanh lý/Hủy)</option>
+                    <option value="Xuất trả nhà cung cấp">Xuất trả nhà cung cấp (Đổi date/Lỗi bao bì)</option>
+                    <option value="Sử dụng nội bộ tiệm">Sử dụng nội bộ tiệm</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Product Details -->
+              <div class="bg-[#F9F9FA] p-3.5 sm:p-4 rounded-xl border border-black/[0.06] space-y-3">
+                <div class="text-xs font-bold text-[#1D1D1F] uppercase tracking-wide">Mặt hàng cần xuất</div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div class="sm:col-span-2">
+                    <label class="block text-xs font-medium text-[#1D1D1F] mb-1">Chọn sản phẩm <span class="text-[#FF3B30]">*</span></label>
+                    <select id="stockout-product-select" onchange="updateStockOutFormFields()" class="w-full px-3 py-2 text-xs apple-input bg-white">
+                      <!-- Populated by JS -->
+                    </select>
+                  </div>
+
+                  <div>
+                    <label class="block text-xs font-medium text-[#1D1D1F] mb-1">Số lượng xuất <span class="text-[#FF3B30]">*</span></label>
+                    <input type="number" id="stockout-qty" required min="1" value="1" oninput="calculateStockOutTotal()"
+                           class="w-full px-3 py-2 text-xs apple-input font-bold">
+                    <span id="stockout-avail-hint" class="text-[10px] text-[#86868B] mt-0.5 block">Tồn hiện tại: --</span>
+                  </div>
+
+                  <div>
+                    <label class="block text-xs font-medium text-[#1D1D1F] mb-1">Đơn giá tham chiếu (đ)</label>
+                    <input type="number" id="stockout-price" required min="0" step="1000" oninput="calculateStockOutTotal()"
+                           class="w-full px-3 py-2 text-xs apple-input">
+                  </div>
+
+                  <div class="sm:col-span-2">
+                    <label class="block text-xs font-medium text-[#1D1D1F] mb-1">Tổng giá trị xuất</label>
+                    <div id="stockout-total-display" class="px-3 py-2 rounded-xl bg-[#F2F2F7] text-[#1D1D1F] font-bold text-xs">
+                      0 đ
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Ghi chú phiếu xuất</label>
+                <textarea id="stockout-note" rows="2" placeholder="Ghi chú nguyên nhân xuất hàng..."
+                          class="w-full px-3 py-2 text-xs apple-input"></textarea>
+              </div>
+
+              <div class="pt-3 border-t border-black/[0.06] flex items-center justify-end gap-2.5">
+                <button type="button" onclick="switchScreen('inventory')" class="apple-btn px-4 py-2 apple-btn-secondary text-xs font-medium">Hủy</button>
+                <button type="submit" class="apple-btn px-5 py-2 apple-btn-dark text-xs font-semibold shadow-xs flex items-center gap-1.5">
+                  <span>⚡ Xác nhận Xuất kho & Trừ tồn</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- ================= VIEW 7: ALERTS & EXPIRY ================= -->
+        <div id="view-alerts" class="subview hidden space-y-4">
+          
+          <div class="apple-card p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3.5">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold apple-badge-danger">Hệ Thống Cảnh Báo Kho FEFO</span>
+                <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+              </div>
+              <h3 class="text-sm sm:text-base font-bold text-[#1D1D1F]">Cảnh báo Thùng hàng cận hạn, đã quá hạn & Thiếu hụt tồn kho</h3>
+              <p class="text-xs text-[#86868B] mt-0.5">
+                Chống thất thoát do quá date và ngăn đứt gãy nguồn hàng.
+              </p>
+            </div>
+            <div class="bg-[#F2F2F7] px-3.5 py-2 rounded-xl border border-black/[0.06] text-center shrink-0">
+              <div class="text-[10px] uppercase tracking-wider text-[#86868B] font-semibold">Tổng cảnh báo</div>
+              <div id="alert-summary-number" class="text-lg sm:text-xl font-bold text-[#1D1D1F]">0 mục</div>
+            </div>
+          </div>
+
+          <!-- Section 1: Expiring Soon & Expired Batches (FEFO) Table -->
+          <div class="apple-card p-4 sm:p-5 space-y-3">
+            <div class="flex items-center justify-between border-b border-black/[0.06] pb-3">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                <h4 class="text-xs font-bold text-[#1D1D1F] uppercase tracking-wider">Thùng hàng Quá Hạn & Cận Hạn cần xử lý ngay</h4>
+              </div>
+              <span class="text-[11px] text-[#86868B]">Xếp theo hạn dùng gần nhất</span>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs min-w-[650px]">
+                <thead>
+                  <tr class="bg-[#F9F9FA] text-[#86868B] border-b border-black/[0.06]">
+                    <th class="py-2.5 px-3 font-semibold">Tình trạng</th>
+                    <th class="py-2.5 px-3 font-semibold">Sản phẩm</th>
+                    <th class="py-2.5 px-3 font-semibold">Mã Thùng / Nhãn</th>
+                    <th class="py-2.5 px-3 font-semibold text-center">Số lượng</th>
+                    <th class="py-2.5 px-3 font-semibold">Vị trí kệ</th>
+                    <th class="py-2.5 px-3 font-semibold">Hạn dùng</th>
+                    <th class="py-2.5 px-3 font-semibold text-center">Thời gian</th>
+                    <th class="py-2.5 px-3 font-semibold text-center">Khuyến nghị xử lý</th>
+                  </tr>
+                </thead>
+                <tbody id="alert-expiring-table-body" class="divide-y divide-black/[0.05]">
+                  <tr><td colspan="8" class="py-4 text-center text-[#86868B]">Đang tải...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Section 2: Low Stock Table -->
+          <div class="apple-card p-4 sm:p-5 space-y-3">
+            <div class="flex items-center justify-between border-b border-black/[0.06] pb-3">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                <h4 class="text-xs font-bold text-[#1D1D1F] uppercase tracking-wider">Mặt hàng thiếu tồn cần đặt thêm</h4>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs min-w-[650px]">
+                <thead>
+                  <tr class="bg-[#F9F9FA] text-[#86868B] border-b border-black/[0.06]">
+                    <th class="py-2.5 px-3 font-semibold">Mức độ</th>
+                    <th class="py-2.5 px-3 font-semibold">Tên mặt hàng</th>
+                    <th class="py-2.5 px-3 font-semibold">Vị trí kệ</th>
+                    <th class="py-2.5 px-3 font-semibold text-center">Tồn / Min</th>
+                    <th class="py-2.5 px-3 font-semibold text-center">Thiếu hụt</th>
+                    <th class="py-2.5 px-3 font-semibold text-center">Gợi ý nhập</th>
+                    <th class="py-2.5 px-3 font-semibold text-center">Hành động</th>
+                  </tr>
+                </thead>
+                <tbody id="alert-lowstock-table-body" class="divide-y divide-black/[0.05]">
+                  <tr><td colspan="7" class="py-4 text-center text-[#86868B]">Đang tải...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ================= VIEW 8: TRANSACTIONS / AUDIT LOG ================= -->
+        <div id="view-transactions" class="subview hidden space-y-4">
+          
+          <div class="apple-card p-3.5 sm:p-4 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-2.5 flex-1 min-w-[220px]">
+              
+              <!-- Dedicated Search (Strictly Transactions) -->
+              <div class="relative flex-1 min-w-[180px] max-w-sm">
+                <input type="text" id="tx-search" oninput="loadTransactions()"
+                       placeholder="Tìm giao dịch theo mã phiếu, ghi chú, SKU..."
+                       class="w-full pl-9 pr-3 py-2 apple-input text-xs text-[#1D1D1F]">
+                <svg class="w-4 h-4 text-[#86868B] absolute left-3 top-2.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              </div>
+
+              <select id="tx-filter-type" onchange="loadTransactions()" class="apple-input text-xs py-2 px-3 text-[#1D1D1F] bg-white">
+                <option value="ALL">Tất cả loại giao dịch</option>
+                <option value="STOCK_OUT">Xuất bán lẻ & Trừ tồn</option>
+                <option value="STOCK_IN">Nhập kho hàng</option>
+                <option value="ADJUST">Kiểm kê kho</option>
+              </select>
+
+            </div>
+
+            <button onclick="loadTransactions()" class="apple-btn px-3.5 py-2 apple-btn-secondary text-xs font-semibold">
+              Làm mới ↻
+            </button>
+          </div>
+
+          <!-- Transaction Table -->
+          <div class="apple-card overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs min-w-[650px]">
+                <thead>
+                  <tr class="bg-[#F9F9FA] text-[#86868B] border-b border-black/[0.06]">
+                    <th class="py-3 px-4 font-semibold">Thời gian</th>
+                    <th class="py-3 px-4 font-semibold">Mã chứng từ</th>
+                    <th class="py-3 px-4 font-semibold">Loại nghiệp vụ</th>
+                    <th class="py-3 px-4 font-semibold">Sản phẩm</th>
+                    <th class="py-3 px-4 font-semibold text-center">Biến động</th>
+                    <th class="py-3 px-4 font-semibold text-center">Tồn sau</th>
+                    <th class="py-3 px-4 font-semibold">Chi tiết thùng & Diễn giải</th>
+                  </tr>
+                </thead>
+                <tbody id="transaction-table-body" class="divide-y divide-black/[0.05]">
+                  <tr><td colspan="7" class="text-center py-8 text-[#86868B]">Đang tải dữ liệu lịch sử kho...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ================= VIEW 9: REPORTS ================= -->
+        <div id="view-reports" class="subview hidden space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-bold text-[#1D1D1F]">Báo Cáo Giá Trị Kho & Xuất - Nhập - Tồn</h3>
+              <p class="text-xs text-[#86868B]">Thống kê tổng quan và biến động tồn kho toàn diện</p>
+            </div>
+            <button onclick="loadReports()" class="apple-btn px-3 py-1.5 apple-btn-secondary text-xs font-semibold">
+              Cập nhật số liệu ↻
+            </button>
+          </div>
+
+          <div id="reports-content-container" class="space-y-4">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- ================= VIEW 10: USERS ================= -->
+        <div id="view-users" class="subview hidden space-y-4 max-w-3xl mx-auto">
+          <div class="apple-card p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 class="text-sm font-bold text-[#1D1D1F]">Quản Lý Tài Khoản Nhân Viên Kho & Thu Ngân</h3>
+              <p class="text-xs text-[#86868B]">Chủ cửa hàng (Admin) & Nhân viên bán/nhập hàng</p>
+            </div>
+            <button onclick="openUserModal()" class="apple-btn px-3.5 py-2 apple-btn-dark text-xs font-semibold shadow-xs">
+              + Thêm tài khoản mới
+            </button>
+          </div>
+
+          <div class="apple-card overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs min-w-[500px]">
+                <thead>
+                  <tr class="bg-[#F9F9FA] text-[#86868B] border-b border-black/[0.06]">
+                    <th class="py-3 px-4 font-semibold">Tên đăng nhập</th>
+                    <th class="py-3 px-4 font-semibold">Họ và tên</th>
+                    <th class="py-3 px-4 font-semibold">Vai trò</th>
+                    <th class="py-3 px-4 font-semibold">Số điện thoại</th>
+                    <th class="py-3 px-4 font-semibold text-center">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="user-table-body" class="divide-y divide-black/[0.05]">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: THÊM / SỬA THÙNG HÀNG (BOX/BATCH) ================= -->
+  <div id="modal-batch" class="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 z-50 hidden">
+    <div class="w-full max-w-md apple-card p-5 sm:p-6 space-y-3.5 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-black/[0.06]">
+        <h3 id="modal-batch-title" class="font-bold text-sm text-[#1D1D1F]">Thêm Thùng Hàng Mới (Box/Batch)</h3>
+        <button onclick="closeBatchModal()" class="text-[#86868B] hover:text-[#1D1D1F] p-1">✕</button>
+      </div>
+
+      <form onsubmit="handleSaveBatch(event)" class="space-y-3">
+        <input type="hidden" id="modal-batch-id">
+
+        <div>
+          <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Mặt hàng <span class="text-[#FF3B30]">*</span></label>
+          <select id="modal-batch-product-id" class="w-full px-3 py-2 text-xs apple-input bg-white text-[#1D1D1F]">
+            <!-- Populated by JS -->
+          </select>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Mã thùng / Lô hàng</label>
+            <input type="text" id="modal-batch-code" placeholder="VD: THUNG-01" class="w-full px-3 py-2 text-xs apple-input font-mono">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Tên nhãn thùng</label>
+            <input type="text" id="modal-batch-label" placeholder="VD: Thùng 30 gói (Kệ A1)" class="w-full px-3 py-2 text-xs apple-input">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Số lượng <span class="text-[#FF3B30]">*</span></label>
+            <input type="number" id="modal-batch-qty" min="1" required value="10" class="w-full px-3 py-2 text-xs apple-input font-bold">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Vị trí kệ</label>
+            <input type="text" id="modal-batch-location" placeholder="VD: Kệ mì A1" class="w-full px-3 py-2 text-xs apple-input">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Ngày nhập</label>
+            <input type="date" id="modal-batch-import-date" class="w-full px-3 py-2 text-xs apple-input">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Hạn sử dụng</label>
+            <input type="date" id="modal-batch-expiry-date" class="w-full px-3 py-2 text-xs apple-input">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Ghi chú</label>
+          <input type="text" id="modal-batch-note" placeholder="VD: Lô khuyến mãi..." class="w-full px-3 py-2 text-xs apple-input">
+        </div>
+
+        <div class="pt-3 border-t border-black/[0.06] flex items-center justify-end gap-2">
+          <button type="button" onclick="closeBatchModal()" class="apple-btn px-4 py-2 apple-btn-secondary text-xs font-medium">Hủy</button>
+          <button type="submit" class="apple-btn px-5 py-2 apple-btn-dark text-xs font-semibold">Lưu Thùng Hàng</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: HÓA ĐƠN THANH TOÁN (Apple Receipt) ================= -->
+  <div id="modal-checkout-receipt" class="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 z-50 hidden">
+    <div class="w-full max-w-sm apple-card p-5 sm:p-6 space-y-3.5 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div class="text-center pb-3 border-b border-black/[0.06]">
+        <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto mb-2 text-sm font-bold">✓</div>
+        <h3 class="font-bold text-sm text-[#1D1D1F]">Thanh Toán & Trừ Kho Thành Công!</h3>
+        <p id="receipt-code-display" class="text-xs font-mono text-[#86868B] mt-0.5">Mã HĐ: --</p>
+      </div>
+
+      <div class="space-y-1.5 text-xs">
+        <div class="flex justify-between text-[#86868B]">
+          <span>Thời gian:</span>
+          <span id="receipt-time-display" class="text-[#1D1D1F]">--</span>
+        </div>
+        <div class="flex justify-between text-[#86868B]">
+          <span>Khách hàng:</span>
+          <span id="receipt-customer-display" class="text-[#1D1D1F]">Khách lẻ</span>
+        </div>
+      </div>
+
+      <!-- Itemized Batches Deducted -->
+      <div class="p-3 bg-[#F9F9FA] rounded-xl border border-black/[0.06] space-y-2">
+        <div class="text-[11px] font-bold text-[#1D1D1F] uppercase tracking-wider">Mặt hàng & Thùng đã trừ (FEFO):</div>
+        <div id="receipt-items-list" class="space-y-1.5 text-xs divide-y divide-black/[0.05]">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Totals -->
+      <div class="space-y-1 text-xs pt-1 border-t border-black/[0.06]">
+        <div class="flex justify-between">
+          <span class="text-[#86868B]">Tổng tiền hàng:</span>
+          <span id="receipt-total-display" class="font-bold text-sm text-[#1D1D1F]">0 đ</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-[#86868B]">Tiền khách đưa:</span>
+          <span id="receipt-received-display" class="text-[#1D1D1F]">0 đ</span>
+        </div>
+        <div class="flex justify-between font-semibold text-[#0071E3]">
+          <span>Tiền thối lại:</span>
+          <span id="receipt-change-display">0 đ</span>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-black/[0.06] flex items-center justify-end gap-2">
+        <button type="button" onclick="window.print()" class="apple-btn px-3.5 py-2 apple-btn-secondary text-xs font-medium">🖨️ In HĐ</button>
+        <button type="button" onclick="closeReceiptModal()" class="apple-btn px-4 py-2 apple-btn-dark text-xs font-semibold">Đóng & Tiếp tục</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: PRODUCT ================= -->
+  <div id="modal-product" class="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 z-50 hidden">
+    <div class="w-full max-w-lg apple-card p-5 sm:p-6 space-y-3.5 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-black/[0.06]">
+        <h3 id="modal-product-title" class="font-bold text-sm text-[#1D1D1F]">Thêm Mặt Hàng Mới</h3>
+        <button onclick="closeProductModal()" class="text-[#86868B] hover:text-[#1D1D1F] p-1">✕</button>
+      </div>
+
+      <form onsubmit="handleSaveProduct(event)" class="space-y-3">
+        <input type="hidden" id="modal-prod-id">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Mã SKU <span class="text-[#FF3B30]">*</span></label>
+            <input type="text" id="modal-prod-sku" required placeholder="VD: TH-HAOHAO" class="w-full px-3 py-2 text-xs apple-input font-mono">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Mã Barcode quét</label>
+            <input type="text" id="modal-prod-barcode" placeholder="VD: 8934563138164" class="w-full px-3 py-2 text-xs apple-input font-mono">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Tên sản phẩm <span class="text-[#FF3B30]">*</span></label>
+          <input type="text" id="modal-prod-name" required placeholder="VD: Mì tôm Hảo Hảo chua cay" class="w-full px-3 py-2 text-xs apple-input">
+        </div>
+
+        <div class="grid grid-cols-3 gap-2.5">
+          <div>
+            <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Nhóm ABC</label>
+            <select id="modal-prod-abc" class="w-full px-2.5 py-2 text-xs apple-input bg-white">
+              <option value="A">⭐ Nhóm A</option>
+              <option value="B" selected>🔹 Nhóm B</option>
+              <option value="C">🔸 Nhóm C</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Ngành hàng</label>
+            <select id="modal-prod-cat" class="w-full px-2.5 py-2 text-xs apple-input bg-white">
+              <option value="Thực phẩm khô">Thực phẩm</option>
+              <option value="Bia & Nước ngọt">Bia & Nước</option>
+              <option value="Gia vị & Dầu ăn">Gia vị</option>
+              <option value="Bánh kẹo & Sữa">Bánh kẹo</option>
+              <option value="Hóa mỹ phẩm">Hóa phẩm</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Đơn vị tính</label>
+            <select id="modal-prod-unit" class="w-full px-2.5 py-2 text-xs apple-input bg-white">
+              <option value="Thùng">Thùng</option>
+              <option value="Gói">Gói</option>
+              <option value="Chai">Chai</option>
+              <option value="Lon">Lon</option>
+              <option value="Lốc">Lốc</option>
+              <option value="Hộp">Hộp</option>
+              <option value="Bao">Bao</option>
+              <option value="Cái">Cái</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Giá vốn (đ)</label>
+            <input type="number" id="modal-prod-cost" min="0" step="1000" placeholder="VD: 112000" class="w-full px-3 py-2 text-xs apple-input">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Giá bán ra (đ) <span class="text-[#FF3B30]">*</span></label>
+            <input type="number" id="modal-prod-price" required min="0" step="1000" placeholder="VD: 125000" class="w-full px-3 py-2 text-xs apple-input font-bold">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Min tồn</label>
+            <input type="number" id="modal-prod-min" required min="1" value="5" class="w-full px-3 py-2 text-xs apple-input">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Max tồn</label>
+            <input type="number" id="modal-prod-max" required min="5" value="50" class="w-full px-3 py-2 text-xs apple-input">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Khu vực kệ</label>
+            <input type="text" id="modal-prod-zone" value="Kệ trưng bày" class="w-full px-3 py-2 text-xs apple-input">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Tầng kệ</label>
+            <input type="text" id="modal-prod-shelf-level" value="Tầng 2 (Tầm mắt)" class="w-full px-3 py-2 text-xs apple-input">
+          </div>
+        </div>
+
+        <div id="modal-prod-init-stock-container">
+          <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Tồn kho ban đầu</label>
+          <input type="number" id="modal-prod-init-stock" min="0" value="0" class="w-full px-3 py-2 text-xs apple-input font-bold">
+        </div>
+
+        <div class="pt-3 border-t border-black/[0.06] flex items-center justify-end gap-2">
+          <button type="button" onclick="closeProductModal()" class="apple-btn px-4 py-2 apple-btn-secondary text-xs font-medium">Hủy</button>
+          <button type="submit" class="apple-btn px-5 py-2 apple-btn-dark text-xs font-semibold">Lưu Mặt Hàng</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: SHELF ================= -->
+  <div id="modal-shelf" class="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 z-50 hidden">
+    <div class="w-full max-w-sm apple-card p-5 sm:p-6 space-y-3.5 shadow-2xl">
+      <div class="flex items-center justify-between pb-3 border-b border-black/[0.06]">
+        <h3 class="font-bold text-sm text-[#1D1D1F]">Sắp Xếp Vị Trí Kệ Kho</h3>
+        <button onclick="closeShelfModal()" class="text-[#86868B] hover:text-[#1D1D1F]">✕</button>
+      </div>
+
+      <form onsubmit="handleSaveShelfLocation(event)" class="space-y-3">
+        <input type="hidden" id="modal-shelf-inv-id">
+
+        <div>
+          <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Mặt hàng</label>
+          <div id="modal-shelf-prod-name" class="font-bold text-xs text-[#1D1D1F] bg-[#F2F2F7] p-2.5 rounded-xl border border-black/[0.06]">--</div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Khu vực kệ</label>
+          <input type="text" id="modal-shelf-zone" class="w-full px-3 py-2 text-xs apple-input">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Tầng kệ</label>
+          <input type="text" id="modal-shelf-level" class="w-full px-3 py-2 text-xs apple-input">
+        </div>
+
+        <div class="pt-3 border-t border-black/[0.06] flex items-center justify-end gap-2">
+          <button type="button" onclick="closeShelfModal()" class="apple-btn px-4 py-2 apple-btn-secondary text-xs font-medium">Hủy</button>
+          <button type="submit" class="apple-btn px-5 py-2 apple-btn-dark text-xs font-semibold">Cập nhật vị trí</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: USER ================= -->
+  <div id="modal-user" class="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 z-50 hidden">
+    <div class="w-full max-w-sm apple-card p-5 sm:p-6 space-y-3 shadow-2xl">
+      <div class="flex items-center justify-between pb-3 border-b border-black/[0.06]">
+        <h3 id="modal-user-title" class="font-bold text-sm text-[#1D1D1F]">Thêm Tài Khoản</h3>
+        <button onclick="closeUserModal()" class="text-[#86868B] hover:text-[#1D1D1F]">✕</button>
+      </div>
+
+      <form onsubmit="handleSaveUser(event)" class="space-y-3">
+        <input type="hidden" id="modal-user-id">
+
+        <div>
+          <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Tên đăng nhập <span class="text-[#FF3B30]">*</span></label>
+          <input type="text" id="modal-user-username" required placeholder="VD: thungan02" class="w-full px-3 py-2 text-xs apple-input">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Họ và tên <span class="text-[#FF3B30]">*</span></label>
+          <input type="text" id="modal-user-fullname" required placeholder="VD: Nguyễn Thị Lan" class="w-full px-3 py-2 text-xs apple-input">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Mật khẩu</label>
+          <input type="password" id="modal-user-password" placeholder="Nhập mật khẩu..." class="w-full px-3 py-2 text-xs apple-input">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Vai trò</label>
+          <select id="modal-user-role" class="w-full px-3 py-2 text-xs apple-input bg-white">
+            <option value="cashier">Thu ngân (Bán hàng & POS)</option>
+            <option value="warehouse">Quản kho (Nhập hàng & Kiểm kê)</option>
+            <option value="admin">Chủ cửa hàng (Toàn quyền)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Số điện thoại</label>
+          <input type="text" id="modal-user-phone" placeholder="VD: 0909123456" class="w-full px-3 py-2 text-xs apple-input">
+        </div>
+
+        <div class="pt-3 border-t border-black/[0.06] flex items-center justify-end gap-2">
+          <button type="button" onclick="closeUserModal()" class="apple-btn px-4 py-2 apple-btn-secondary text-xs font-medium">Hủy</button>
+          <button type="submit" class="apple-btn px-5 py-2 apple-btn-dark text-xs font-semibold">Lưu tài khoản</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: AI COPILOT ================= -->
+  <div id="modal-ai-copilot" class="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 z-50 hidden">
+    <div class="w-full max-w-xl apple-card p-5 sm:p-6 space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-black/[0.06]">
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.857L13 21l-2.286-6.857L5 12l5.714-2.857L13 3z"/></svg>
+          <h3 class="font-bold text-sm text-[#1D1D1F]">Trợ Lý AI Phân Tích Kho & Gợi Ý Vận Hành</h3>
+        </div>
+        <button onclick="closeAiCopilotModal()" class="text-[#86868B] hover:text-[#1D1D1F] p-1">✕</button>
+      </div>
+
+      <div id="ai-modal-loading" class="text-center py-8 text-xs text-[#86868B]">
+        Đang phân tích sâu dữ liệu kho thực tế theo mô hình 5S & FEFO...
+      </div>
+
+      <div id="ai-modal-content" class="hidden space-y-3.5">
+        <!-- AI Health Score -->
+        <div class="p-3.5 rounded-xl bg-[#F2F2F7] flex items-center justify-between">
+          <div>
+            <div class="text-[10px] uppercase font-bold text-[#86868B]">Chỉ số sức khỏe kho</div>
+            <div id="ai-health-score" class="text-2xl font-bold text-[#1D1D1F]">--/100</div>
+          </div>
+          <div id="ai-health-status" class="px-3 py-1 rounded-full text-xs font-semibold apple-badge-safe">
+            Kho vận hành tốt
+          </div>
+        </div>
+
+        <!-- AI Recommendations List -->
+        <div class="space-y-2">
+          <div class="text-xs font-bold text-[#1D1D1F] uppercase tracking-wider">Khuyến nghị sắp xếp & luân chuyển:</div>
+          <div id="ai-suggestions-list" class="space-y-2 text-xs">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-black/[0.06] flex justify-end">
+        <button type="button" onclick="closeAiCopilotModal()" class="apple-btn px-4 py-2 apple-btn-dark text-xs font-semibold">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
