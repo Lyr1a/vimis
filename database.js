@@ -1,6 +1,6 @@
-// VIMIS Database Layer - Universal SQLite via sql.js (WebAssembly)
-// Compatible with both Local Node.js and Vercel Serverless Functions
-const initSqlJs = require('sql.js');
+// VIMIS Database Layer - Universal SQLite via sql-wasm-inline (WebAssembly)
+// Compatible with both Local Node.js and Vercel Serverless Functions without external .wasm file dependency
+const initSqlJs = require('sql.js/dist/sql-wasm-inline.js');
 const fs = require('fs');
 const path = require('path');
 
@@ -347,16 +347,24 @@ async function initDatabase() {
       );
     `);
 
-    // Seed default users if empty
-    const userCount = db.prepare('SELECT COUNT(*) as cnt FROM users').get()?.cnt || 0;
-    if (userCount === 0) {
-      const insertUser = db.prepare(`
-        INSERT INTO users (username, password, full_name, role, phone)
-        VALUES (?, ?, ?, ?, ?)
-      `);
-      insertUser.run('admin', 'admin123', 'Nguyễn Văn Chủ Tiệm', 'admin', '0909123456');
-      insertUser.run('thungan', '123456', 'Trần Thị Thu Ngân (Thu ngân POS)', 'cashier', '0912987654');
-      insertUser.run('kiemkho', '123456', 'Lê Văn Kiểm Kho (Nhập hàng)', 'warehouse', '0988776655');
+    // Ensure default demo users always exist (admin, thungan, kiemkho)
+    const requiredUsers = [
+      { username: 'admin', password: 'admin123', full_name: 'Nguyễn Văn Chủ Tiệm', role: 'admin', phone: '0909123456' },
+      { username: 'thungan', password: '123456', full_name: 'Trần Thị Thu Ngân (Thu ngân POS)', role: 'cashier', phone: '0912987654' },
+      { username: 'kiemkho', password: '123456', full_name: 'Lê Văn Kiểm Kho (Nhập hàng)', role: 'warehouse', phone: '0988776655' }
+    ];
+
+    const checkUserStmt = db.prepare('SELECT id FROM users WHERE LOWER(username) = LOWER(?)');
+    const insertUserStmt = db.prepare(`
+      INSERT INTO users (username, password, full_name, role, phone)
+      VALUES (?, ?, ?, ?, ?)
+    `);
+
+    for (const u of requiredUsers) {
+      const exists = checkUserStmt.get(u.username);
+      if (!exists) {
+        insertUserStmt.run(u.username, u.password, u.full_name, u.role, u.phone);
+      }
     }
 
     // Seed initial products if empty
