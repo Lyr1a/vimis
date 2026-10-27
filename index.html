@@ -172,11 +172,11 @@
         <p class="text-[11px] text-[#86868B] text-center mb-2.5 font-medium">Chọn nhanh vai trò:</p>
         <div class="grid grid-cols-2 gap-2">
           <button type="button" onclick="quickFillLogin('admin', 'admin123')" class="apple-btn p-2.5 rounded-xl border border-[#E5E5EA] bg-[#F9F9FA] hover:bg-[#F2F2F7] text-left transition text-xs">
-            <div class="font-bold text-[#1D1D1F] flex items-center gap-1.5">👑 Chủ tiệm</div>
+            <div class="font-bold text-[#1D1D1F] flex items-center gap-1.5">Chủ tiệm</div>
             <div class="text-[10px] text-[#86868B] mt-0.5">Toàn quyền kho & bán</div>
           </button>
           <button type="button" onclick="quickFillLogin('thungan', '123456')" class="apple-btn p-2.5 rounded-xl border border-[#E5E5EA] bg-[#F9F9FA] hover:bg-[#F2F2F7] text-left transition text-xs">
-            <div class="font-bold text-[#1D1D1F] flex items-center gap-1.5">🛒 Thu ngân</div>
+            <div class="font-bold text-[#1D1D1F] flex items-center gap-1.5">Thu ngân</div>
             <div class="text-[10px] text-[#86868B] mt-0.5">Quét mã & Bán POS</div>
           </button>
         </div>
@@ -316,6 +316,15 @@
             <span id="menu-alert-badge" class="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-[#FF3B30] text-white">0</span>
           </button>
 
+          <!-- RFID WAREHOUSE MANAGEMENT -->
+          <button onclick="switchScreen('rfid'); closeMobileSidebarIfOpen();" class="apple-btn sidebar-item w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium hover:text-white hover:bg-[#27272A]/60 transition" data-menu="rfid">
+            <div class="flex items-center gap-3">
+              <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6m-6 4h4"/></svg>
+              <span>Quản lý & Quét RFID</span>
+            </div>
+            <span id="menu-rfid-count" class="text-[9px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-1.5 py-0.2 rounded font-mono">RFID</span>
+          </button>
+
           <button onclick="switchScreen('transactions'); closeMobileSidebarIfOpen();" class="apple-btn sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium hover:text-white hover:bg-[#27272A]/60 transition" data-menu="transactions">
             <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             <span>Nhật ký biến động kho</span>
@@ -360,10 +369,10 @@
             </div>
             <div class="flex items-center gap-2">
               <button onclick="switchScreen('pos')" class="apple-btn px-3.5 py-2 apple-btn-dark font-medium text-xs shadow-xs flex items-center gap-1.5">
-                <span>🛒 Mở Quầy Bán (POS)</span>
+                <span>Mở Quầy Bán (POS)</span>
               </button>
               <button onclick="openAiCopilotModal()" class="apple-btn px-3 py-2 apple-btn-secondary font-medium text-xs flex items-center gap-1.5">
-                <span>✨ AI Gợi Ý</span>
+                <span>AI Gợi Ý</span>
               </button>
             </div>
           </div>
@@ -548,7 +557,7 @@
                   <!-- FEFO Note -->
                   <div class="p-2.5 rounded-xl bg-[#F2F2F7] text-[11px] text-[#3A3A3C] flex items-center justify-between">
                     <span class="flex items-center gap-1.5 font-medium">
-                      <span>⚡ Quy tắc kho:</span>
+                      <span>Quy tắc kho:</span>
                       <span>FEFO tự động</span>
                     </span>
                     <span class="text-[#86868B]">Trừ thùng hạn gần nhất trước</span>
@@ -557,10 +566,10 @@
                   <!-- Payment Method -->
                   <div class="grid grid-cols-2 gap-2">
                     <button type="button" id="pos-pm-cash" onclick="setPosPaymentMethod('CASH')" class="apple-btn py-2 px-3 rounded-xl border text-xs font-semibold bg-[#1D1D1F] text-white">
-                      💵 Tiền mặt
+                      Tiền mặt
                     </button>
                     <button type="button" id="pos-pm-transfer" onclick="setPosPaymentMethod('TRANSFER')" class="apple-btn py-2 px-3 rounded-xl border border-[#E5E5EA] bg-[#F9F9FA] text-[#1D1D1F] text-xs font-semibold hover:bg-[#F2F2F7]">
-                      📱 Chuyển khoản QR
+                      Chuyển khoản QR
                     </button>
                   </div>
 
@@ -588,7 +597,7 @@
 
                   <!-- Complete Checkout Button -->
                   <button type="button" onclick="handlePosCheckout()" class="apple-btn w-full py-3 apple-btn-dark font-bold text-xs shadow-sm flex items-center justify-center gap-2">
-                    <span>⚡ Thanh toán & Tự động trừ kho</span>
+                    <span>Thanh toán & Tự động trừ kho</span>
                     <span class="text-[10px] text-white/60 font-mono">(F9)</span>
                   </button>
 
@@ -721,9 +730,9 @@
               <!-- ABC Filter -->
               <select id="prod-filter-abc" onchange="loadProducts()" class="apple-input text-xs py-2 px-3 text-[#1D1D1F] bg-white">
                 <option value="ALL">Tất cả nhóm ABC</option>
-                <option value="A">⭐ Nhóm A (Bán chạy)</option>
-                <option value="B">🔹 Nhóm B (Bán vừa)</option>
-                <option value="C">🔸 Nhóm C (Bán chậm)</option>
+                <option value="A">Nhóm A (Bán chạy)</option>
+                <option value="B">Nhóm B (Bán vừa)</option>
+                <option value="C">Nhóm C (Bán chậm)</option>
               </select>
 
               <!-- Category Filter -->
@@ -857,7 +866,7 @@
               <div class="pt-3 border-t border-black/[0.06] flex items-center justify-end gap-2.5">
                 <button type="button" onclick="switchScreen('inventory')" class="apple-btn px-4 py-2 apple-btn-secondary text-xs font-medium">Hủy</button>
                 <button type="submit" class="apple-btn px-5 py-2 apple-btn-dark text-xs font-semibold shadow-xs flex items-center gap-1.5">
-                  <span>✓ Lưu Phiếu Nhập & Tạo Thùng</span>
+                  <span>Lưu Phiếu Nhập & Tạo Thùng</span>
                 </button>
               </div>
             </form>
@@ -869,7 +878,7 @@
             <textarea id="bulk-paste-text" rows="8" placeholder="Dán danh sách từ Excel theo định dạng: Tên sản phẩm, Số lượng, Đơn giá, Đơn vị..."
                       class="w-full p-3 font-mono text-xs apple-input"></textarea>
             <button type="button" onclick="handleBulkSyncPaste()" class="apple-btn px-5 py-2 apple-btn-dark text-xs font-bold shadow-xs">
-              ⚡ Nạp & Đồng bộ tồn kho ngay
+              Nạp & Đồng bộ tồn kho ngay
             </button>
           </div>
 
@@ -948,7 +957,7 @@
               <div class="pt-3 border-t border-black/[0.06] flex items-center justify-end gap-2.5">
                 <button type="button" onclick="switchScreen('inventory')" class="apple-btn px-4 py-2 apple-btn-secondary text-xs font-medium">Hủy</button>
                 <button type="submit" class="apple-btn px-5 py-2 apple-btn-dark text-xs font-semibold shadow-xs flex items-center gap-1.5">
-                  <span>⚡ Xác nhận Xuất kho & Trừ tồn</span>
+                  <span>Xác nhận Xuất kho & Trừ tồn</span>
                 </button>
               </div>
             </form>
@@ -1030,6 +1039,129 @@
                 </thead>
                 <tbody id="alert-lowstock-table-body" class="divide-y divide-black/[0.05]">
                   <tr><td colspan="7" class="py-4 text-center text-[#86868B]">Đang tải...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ================= VIEW: RFID WAREHOUSE MANAGEMENT ================= -->
+        <div id="view-rfid" class="subview hidden space-y-4">
+          <!-- RFID Header Banner -->
+          <div class="apple-card p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3.5">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">Công Nghệ RFID 860-960 MHz</span>
+                <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+              </div>
+              <h3 class="text-sm sm:text-base font-bold text-[#1D1D1F]">Nhập hàng tốc độ cao & Kiểm đếm kho không tiếp xúc bằng RFID</h3>
+              <p class="text-xs text-[#86868B] mt-0.5">
+                Quét đồng thời hàng loạt thẻ RFID gắn trên thùng hàng, tự động nhận diện lô hàng và vị trí kệ.
+              </p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="openRfidScanModal()" class="apple-btn px-3.5 py-2 apple-btn-dark text-xs font-semibold shadow-xs flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-indigo-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                <span>Mở Cổng Quét RFID Hàng Loạt</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick RFID Stats -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3.5">
+            <div class="apple-card p-3.5 sm:p-4">
+              <div class="text-[11px] text-[#86868B] font-medium">Tổng thẻ RFID hoạt động</div>
+              <div id="stat-rfid-total" class="text-lg sm:text-2xl font-bold text-[#1D1D1F] mt-1">--</div>
+              <div class="text-[10px] text-[#86868B] mt-1">Đã gắn vào SP & Thùng</div>
+            </div>
+            <div class="apple-card p-3.5 sm:p-4">
+              <div class="text-[11px] text-[#86868B] font-medium">Thùng hàng có RFID</div>
+              <div id="stat-rfid-batches" class="text-lg sm:text-2xl font-bold text-indigo-600 mt-1">--</div>
+              <div class="text-[10px] text-[#86868B] mt-1">Theo dõi hạn sử dụng FEFO</div>
+            </div>
+            <div class="apple-card p-3.5 sm:p-4">
+              <div class="text-[11px] text-[#86868B] font-medium">Mặt hàng định danh RFID</div>
+              <div id="stat-rfid-products" class="text-lg sm:text-2xl font-bold text-emerald-600 mt-1">--</div>
+              <div class="text-[10px] text-[#86868B] mt-1">Nhận diện tức thì tại quầy/kho</div>
+            </div>
+            <div class="apple-card p-3.5 sm:p-4">
+              <div class="text-[11px] text-[#86868B] font-medium">Tốc độ quét nhận diện</div>
+              <div class="text-lg sm:text-2xl font-bold text-[#1D1D1F] mt-1">< 50 ms</div>
+              <div class="text-[10px] text-emerald-600 mt-1">Không cần căn góc quét</div>
+            </div>
+          </div>
+
+          <!-- RFID Realtime Scanner & Search Bar -->
+          <div class="apple-card p-3.5 sm:p-4 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2.5">
+              <div class="relative flex-1 min-w-[220px] max-w-md">
+                <input type="text" id="rfid-search" oninput="loadRfidTags()"
+                       placeholder="Tìm theo mã thẻ RFID, SKU, tên sản phẩm hoặc mã thùng..."
+                       class="w-full pl-9 pr-3 py-2 apple-input text-xs text-[#1D1D1F]">
+                <svg class="w-4 h-4 text-[#86868B] absolute left-3 top-2.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              </div>
+
+              <!-- Quick simulate scan -->
+              <div class="flex items-center gap-2">
+                <input type="text" id="rfid-quick-input" placeholder="Mô phỏng máy đọc quét 1 thẻ..." 
+                       onkeydown="handleRfidQuickScan(event)"
+                       class="px-3 py-2 apple-input text-xs font-mono w-52">
+                <button type="button" onclick="triggerRfidQuickScan()" class="apple-btn px-3 py-2 apple-btn-dark text-xs font-semibold">
+                  Quét
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- RFID Tags Table -->
+          <div class="apple-card overflow-hidden">
+            <div class="p-3.5 sm:p-4 border-b border-black/[0.06] flex items-center justify-between">
+              <div class="text-xs font-bold text-[#1D1D1F] uppercase tracking-wider">Danh Sách Mã Thẻ RFID Gắn Trên Thùng & Sản Phẩm</div>
+              <button onclick="loadRfidTags()" class="apple-btn px-2.5 py-1 apple-btn-secondary text-xs">Làm mới</button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs min-w-[700px]">
+                <thead>
+                  <tr class="bg-[#F9F9FA] text-[#86868B] border-b border-black/[0.06]">
+                    <th class="py-3 px-4 font-semibold">Mã Thẻ RFID (EPC)</th>
+                    <th class="py-3 px-4 font-semibold">Loại</th>
+                    <th class="py-3 px-4 font-semibold">Tên Sản Phẩm / Lô Thùng</th>
+                    <th class="py-3 px-4 font-semibold">Mã SKU / Thùng</th>
+                    <th class="py-3 px-4 font-semibold text-center">Tồn Hiện Tại</th>
+                    <th class="py-3 px-4 font-semibold">Vị Trí Kệ</th>
+                    <th class="py-3 px-4 font-semibold">Hạn Dùng (FEFO)</th>
+                    <th class="py-3 px-4 font-semibold text-center">Thao Tác</th>
+                  </tr>
+                </thead>
+                <tbody id="rfid-table-body" class="divide-y divide-black/[0.05]">
+                  <tr><td colspan="8" class="text-center py-6 text-[#86868B]">Đang tải danh sách thẻ RFID...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- RFID Recent Scan Logs -->
+          <div class="apple-card p-4 sm:p-5 space-y-3">
+            <div class="flex items-center justify-between border-b border-black/[0.06] pb-3">
+              <h4 class="text-xs font-bold text-[#1D1D1F] uppercase tracking-wider">Nhật Ký Quét Của Thiết Bị RFID Reader Gần Nhất</h4>
+              <button onclick="loadRfidLogs()" class="text-[11px] text-[#0071E3] font-semibold hover:underline">Làm mới nhật ký</button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs min-w-[650px]">
+                <thead>
+                  <tr class="bg-[#F9F9FA] text-[#86868B] border-b border-black/[0.06]">
+                    <th class="py-2.5 px-3 font-semibold">Thời Gian</th>
+                    <th class="py-2.5 px-3 font-semibold">Mã Thẻ RFID</th>
+                    <th class="py-2.5 px-3 font-semibold">Hành Động</th>
+                    <th class="py-2.5 px-3 font-semibold">Sản Phẩm Nhận Diện</th>
+                    <th class="py-2.5 px-3 font-semibold text-center">Số Lượng</th>
+                    <th class="py-2.5 px-3 font-semibold">Vị Trí</th>
+                    <th class="py-2.5 px-3 font-semibold">Ghi Chú</th>
+                  </tr>
+                </thead>
+                <tbody id="rfid-logs-table-body" class="divide-y divide-black/[0.05]">
+                  <tr><td colspan="7" class="text-center py-4 text-[#86868B]">Chưa có lượt quét RFID nào gần đây.</td></tr>
                 </tbody>
               </table>
             </div>
@@ -1167,6 +1299,11 @@
           </div>
 
           <div>
+            <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Mã Thẻ RFID Thùng</label>
+            <input type="text" id="modal-batch-rfid" placeholder="VD: RFID-HH-01" class="w-full px-3 py-2 text-xs apple-input font-mono">
+          </div>
+
+          <div>
             <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Tên nhãn thùng</label>
             <input type="text" id="modal-batch-label" placeholder="VD: Thùng 30 gói (Kệ A1)" class="w-full px-3 py-2 text-xs apple-input">
           </div>
@@ -1202,6 +1339,62 @@
           <button type="submit" class="apple-btn px-5 py-2 apple-btn-dark text-xs font-semibold">Lưu Thùng Hàng</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: RFID BATCH SCANNER ================= -->
+  <div id="modal-rfid-scan" class="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 z-50 hidden">
+    <div class="w-full max-w-lg apple-card p-5 sm:p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-black/[0.06]">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6m-6 4h4"/></svg>
+          </div>
+          <div>
+            <h3 class="font-bold text-sm text-[#1D1D1F]">Cổng Quét RFID Hàng Loạt</h3>
+            <p class="text-[11px] text-[#86868B]">Quét tức thì nhiều thẻ cùng lúc khi xe hàng đi qua</p>
+          </div>
+        </div>
+        <button onclick="closeRfidScanModal()" class="text-[#86868B] hover:text-[#1D1D1F] p-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Mục đích quét</label>
+          <select id="rfid-scan-purpose" class="w-full px-3 py-2 text-xs apple-input bg-white">
+            <option value="INSPECTION">Kiểm đếm tồn kho định kỳ</option>
+            <option value="STOCK_IN">Nhập hàng tự động vào kho</option>
+            <option value="LOCATION_UPDATE">Cập nhật vị trí kệ hàng</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Dán / Nhập danh sách mã RFID (mỗi mã 1 dòng)</label>
+          <textarea id="rfid-bulk-tags-input" rows="5" 
+                    placeholder="E28011606000020420000001&#10;RFID-HH-01&#10;RFID-CP-02..."
+                    class="w-full p-3 font-mono text-xs apple-input"></textarea>
+          <div class="text-[10px] text-[#86868B] mt-1 flex justify-between">
+            <span>Hoặc bấm mẫu để thử nghiệm nhanh:</span>
+            <button type="button" onclick="fillSampleRfidTags()" class="text-indigo-600 hover:underline font-semibold">Điền thẻ mẫu</button>
+          </div>
+        </div>
+
+        <!-- Scan action -->
+        <button type="button" onclick="submitBulkRfidScan()" class="apple-btn w-full py-2.5 apple-btn-dark text-xs font-semibold shadow-xs flex items-center justify-center gap-2">
+          <span>Tiến Hành Quét & Nhận Diện Thẻ</span>
+        </button>
+
+        <!-- Scan Results -->
+        <div id="rfid-bulk-results-container" class="hidden space-y-2 pt-2 border-t border-black/[0.06]">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-[#1D1D1F]">Kết Quả Quét:</span>
+            <span id="rfid-bulk-stats" class="text-emerald-600 font-semibold"></span>
+          </div>
+          <div id="rfid-bulk-results-list" class="space-y-1.5 max-h-48 overflow-y-auto"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1250,7 +1443,7 @@
       </div>
 
       <div class="pt-3 border-t border-black/[0.06] flex items-center justify-end gap-2">
-        <button type="button" onclick="window.print()" class="apple-btn px-3.5 py-2 apple-btn-secondary text-xs font-medium">🖨️ In HĐ</button>
+        <button type="button" onclick="window.print()" class="apple-btn px-3.5 py-2 apple-btn-secondary text-xs font-medium">In HĐ</button>
         <button type="button" onclick="closeReceiptModal()" class="apple-btn px-4 py-2 apple-btn-dark text-xs font-semibold">Đóng & Tiếp tục</button>
       </div>
     </div>
@@ -1277,6 +1470,11 @@
             <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Mã Barcode quét</label>
             <input type="text" id="modal-prod-barcode" placeholder="VD: 8934563138164" class="w-full px-3 py-2 text-xs apple-input font-mono">
           </div>
+
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Mã Thẻ RFID (Tùy chọn)</label>
+            <input type="text" id="modal-prod-rfid" placeholder="VD: E28011606000020420000001" class="w-full px-3 py-2 text-xs apple-input font-mono">
+          </div>
         </div>
 
         <div>
@@ -1288,9 +1486,9 @@
           <div>
             <label class="block text-xs font-semibold text-[#1D1D1F] mb-1">Nhóm ABC</label>
             <select id="modal-prod-abc" class="w-full px-2.5 py-2 text-xs apple-input bg-white">
-              <option value="A">⭐ Nhóm A</option>
-              <option value="B" selected>🔹 Nhóm B</option>
-              <option value="C">🔸 Nhóm C</option>
+              <option value="A">Nhóm A</option>
+              <option value="B" selected>Nhóm B</option>
+              <option value="C">Nhóm C</option>
             </select>
           </div>
 

@@ -210,9 +210,9 @@ function updateUserProfileUI() {
   if (nameEl) nameEl.textContent = currentUser.full_name || 'Người dùng';
   if (roleEl) {
     const roleNames = {
-      admin: '👑 Chủ tiệm',
-      cashier: '🛒 Thu ngân',
-      warehouse: '📦 Quản kho',
+      admin: 'Chủ tiệm',
+      cashier: 'Thu ngân',
+      warehouse: 'Quản kho',
       staff: 'Nhân viên',
       guest: 'Khách'
     };
@@ -286,6 +286,8 @@ function switchScreen(screenId) {
     populateStockOutDropdown();
   } else if (screenId === 'alerts') {
     loadAlerts();
+  } else if (screenId === 'rfid') {
+    loadRfidView();
   } else if (screenId === 'transactions') {
     loadTransactions();
   } else if (screenId === 'reports') {
@@ -314,9 +316,9 @@ function renderDashboardUI(data) {
   if (!data) return;
 
   document.getElementById('stat-total-sku').textContent = `${data.total_sku} Mặt hàng`;
-  document.getElementById('stat-class-a').textContent = `⭐ ${data.class_a_count} hàng nhóm A bán chạy`;
+  document.getElementById('stat-class-a').textContent = `${data.class_a_count} hàng nhóm A bán chạy`;
   document.getElementById('stat-total-units').textContent = `${data.total_units.toLocaleString('vi-VN')} SP`;
-  document.getElementById('stat-total-batches').textContent = `📦 ${data.total_batches || 0} Lô/Thùng hàng`;
+  document.getElementById('stat-total-batches').textContent = `${data.total_batches || 0} Lô/Thùng hàng`;
 
   const roleCfg = getCurrentRoleConfig();
   if (roleCfg.canViewCostPrice) {
@@ -632,7 +634,7 @@ function renderPosCart() {
   if (posCart.length === 0) {
     container.innerHTML = `
       <div class="py-10 text-center text-xs text-[#86868B] space-y-1">
-        <div class="text-2xl">🛒</div>
+        <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slate-400"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg></div>
         <div>Chưa có sản phẩm nào trong giỏ.</div>
         <div class="text-[11px] text-[#A1A1A6]">Quét mã vạch hoặc bấm vào sản phẩm bên trái</div>
       </div>
@@ -749,7 +751,7 @@ function showCheckoutReceiptModal(data) {
         <div class="py-1 flex items-center justify-between text-xs">
           <div>
             <div class="font-bold text-[#1D1D1F]">${prodName} x ${item.quantity}</div>
-            <div class="text-[10px] text-emerald-700 font-mono">⚡ Đã trừ thùng: ${batchStr}</div>
+            <div class="text-[10px] text-emerald-700 font-mono">Đã trừ thùng: ${batchStr}</div>
           </div>
           <div class="font-bold text-[#1D1D1F]">${formatVND(item.subtotal)}</div>
         </div>
@@ -839,7 +841,7 @@ function renderInventoryTable(items, summary) {
       let expiringCount = batches.filter(b => b.batch_expiry_status === 'EXPIRING_SOON' || b.batch_expiry_status === 'CRITICAL').length;
 
       let tagColor = 'apple-badge-neutral';
-      let tagText = `📦 ${batches.length} Thùng`;
+      let tagText = `${batches.length} Thùng`;
 
       if (expiredCount > 0) {
         tagColor = 'apple-badge-danger';
@@ -870,7 +872,7 @@ function renderInventoryTable(items, summary) {
           <div class="apple-card p-3 space-y-2.5">
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold text-[#1D1D1F] uppercase tracking-wider flex items-center gap-1.5">
-                <span>📦 Danh sách các Thùng hàng của "${p.name}"</span>
+                <span>Danh sách các Thùng hàng của "${p.name}"</span>
                 <span class="text-[#86868B] font-normal text-[11px]">(Tự động ưu tiên xuất thùng hết hạn trước - FEFO)</span>
               </span>
               <button onclick="openBatchModal(${p.product_id})" class="px-2.5 py-1 apple-btn-dark text-[10px] font-semibold">
@@ -1259,11 +1261,11 @@ function renderProductTable(items) {
 
     let abcBadge = '';
     if (p.abc_class === 'A') {
-      abcBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200" title="Nhóm A: Hàng bán chạy nhất">⭐ Nhóm A</span>`;
+      abcBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200" title="Nhóm A: Hàng bán chạy nhất">Nhóm A</span>`;
     } else if (p.abc_class === 'B') {
-      abcBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold apple-badge-neutral" title="Nhóm B: Bán vừa">🔹 Nhóm B</span>`;
+      abcBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold apple-badge-neutral" title="Nhóm B: Bán vừa">Nhóm B</span>`;
     } else {
-      abcBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-medium apple-badge-neutral" title="Nhóm C: Quay vòng chậm">🔸 Nhóm C</span>`;
+      abcBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-medium apple-badge-neutral" title="Nhóm C: Quay vòng chậm">Nhóm C</span>`;
     }
 
     const costDisplay = roleCfg.canViewCostPrice 
@@ -1931,9 +1933,9 @@ function renderUsersTable(users) {
   if (!tbody || !users) return;
 
   const roleLabels = {
-    admin: '👑 Chủ tiệm (Toàn quyền)',
-    cashier: '🛒 Thu ngân (POS)',
-    warehouse: '📦 Quản kho (Nhập hàng)',
+    admin: 'Chủ tiệm (Toàn quyền)',
+    cashier: 'Thu ngân (POS)',
+    warehouse: 'Quản kho (Nhập hàng)',
     staff: 'Nhân viên'
   };
 
@@ -2062,3 +2064,233 @@ async function openAiCopilotModal() {
 function closeAiCopilotModal() {
   document.getElementById('modal-ai-copilot').classList.add('hidden');
 }
+
+// ==============================================================================
+// RFID MODULE (Quản lý & Quét thẻ RFID tốc độ cao)
+// ==============================================================================
+let cachedRfidTags = [];
+
+async function loadRfidView() {
+  await Promise.all([
+    loadRfidTags(),
+    loadRfidLogs()
+  ]);
+}
+
+async function loadRfidTags() {
+  try {
+    const search = document.getElementById('rfid-search')?.value || '';
+    const url = new URL('/api/rfid/tags', window.location.origin);
+    if (search.trim()) url.searchParams.append('search', search.trim());
+
+    const res = await apiFetch(url);
+    const result = await res.json();
+
+    if (result.success) {
+      cachedRfidTags = result.data || [];
+      renderRfidTable(cachedRfidTags);
+
+      const totalEl = document.getElementById('stat-rfid-total');
+      const batchesEl = document.getElementById('stat-rfid-batches');
+      const prodEl = document.getElementById('stat-rfid-products');
+      const badgeEl = document.getElementById('menu-rfid-count');
+
+      const batchCount = cachedRfidTags.filter(t => t.item_type === 'BATCH').length;
+      const prodCount = cachedRfidTags.filter(t => t.item_type === 'PRODUCT').length;
+
+      if (totalEl) totalEl.textContent = `${cachedRfidTags.length} Thẻ`;
+      if (batchesEl) batchesEl.textContent = `${batchCount} Thùng`;
+      if (prodEl) prodEl.textContent = `${prodCount} SP`;
+      if (badgeEl) badgeEl.textContent = `${cachedRfidTags.length}`;
+    }
+  } catch (error) {
+    console.error('Lỗi tải danh sách RFID:', error);
+  }
+}
+
+function renderRfidTable(tags) {
+  const tbody = document.getElementById('rfid-table-body');
+  if (!tbody) return;
+
+  if (tags.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-[#86868B]">Chưa có mã thẻ RFID nào được gắn.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = tags.map(t => {
+    const isBatch = t.item_type === 'BATCH';
+    const typeBadge = isBatch
+      ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">Lô Thùng</span>`
+      : `<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Sản phẩm</span>`;
+
+    return `
+      <tr class="hover:bg-[#F9F9FA] transition border-b border-black/[0.05]">
+        <td class="py-3 px-4 font-mono font-bold text-xs text-indigo-600">
+          <div class="flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 text-indigo-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6m-6 4h4"/></svg>
+            <span>${t.rfid_tag}</span>
+          </div>
+        </td>
+        <td class="py-3 px-4">${typeBadge}</td>
+        <td class="py-3 px-4 font-bold text-[#1D1D1F]">${t.name}</td>
+        <td class="py-3 px-4 font-mono text-[#86868B] text-xs">${t.batch_code || t.sku}</td>
+        <td class="py-3 px-4 text-center font-bold text-[#1D1D1F]">${t.current_stock} ${t.unit}</td>
+        <td class="py-3 px-4 text-[#86868B]">${t.location || '--'}</td>
+        <td class="py-3 px-4 font-mono text-xs ${t.expiry_date ? 'text-amber-700 font-semibold' : 'text-[#86868B]'}">${t.expiry_date || 'Theo từng thùng'}</td>
+        <td class="py-3 px-4 text-center">
+          <button onclick="testRfidScan('${t.rfid_tag}')" class="apple-btn px-2.5 py-1 apple-btn-secondary text-xs font-medium">
+            Quét thử
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function loadRfidLogs() {
+  try {
+    const res = await apiFetch('/api/rfid/logs');
+    const result = await res.json();
+    const tbody = document.getElementById('rfid-logs-table-body');
+    if (!tbody) return;
+
+    if (result.success && result.data && result.data.length > 0) {
+      tbody.innerHTML = result.data.slice(0, 15).map(l => {
+        const timeStr = l.created_at ? l.created_at.slice(5, 19).replace('T', ' ') : '--';
+        return `
+          <tr class="hover:bg-[#F9F9FA] transition border-b border-black/[0.05]">
+            <td class="py-2.5 px-3 font-mono text-[11px] text-[#86868B]">${timeStr}</td>
+            <td class="py-2.5 px-3 font-mono text-xs text-indigo-600 font-semibold">${l.rfid_tag}</td>
+            <td class="py-2.5 px-3 font-medium text-xs text-[#1D1D1F]">${l.scan_type}</td>
+            <td class="py-2.5 px-3 text-xs font-semibold text-[#1D1D1F]">${l.product_name || '--'}</td>
+            <td class="py-2.5 px-3 text-xs font-bold text-center text-[#1D1D1F]">${l.quantity || 1}</td>
+            <td class="py-2.5 px-3 text-xs text-[#86868B]">${l.location || '--'}</td>
+            <td class="py-2.5 px-3 text-xs text-[#86868B]">${l.note || '--'}</td>
+          </tr>
+        `;
+      }).join('');
+    } else {
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-[#86868B]">Chưa có lịch sử quét thẻ RFID.</td></tr>`;
+    }
+  } catch (e) {
+    console.error('Lỗi nạp nhật ký RFID:', e);
+  }
+}
+
+function handleRfidQuickScan(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    triggerRfidQuickScan();
+  }
+}
+
+async function triggerRfidQuickScan() {
+  const input = document.getElementById('rfid-quick-input');
+  const tag = input?.value.trim();
+  if (!tag) {
+    showToast('Lỗi', 'Vui lòng nhập hoặc quét mã thẻ RFID!', false);
+    return;
+  }
+
+  await testRfidScan(tag);
+  if (input) input.value = '';
+}
+
+async function testRfidScan(tag) {
+  try {
+    const res = await apiFetch('/api/rfid/scan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tag, scan_type: 'INSPECTION' })
+    });
+    const result = await res.json();
+
+    if (result.success && result.data && result.data.length > 0) {
+      const match = result.data[0];
+      if (match.found) {
+        showToast('Nhận diện thẻ RFID thành công!', `[${match.type}] ${match.data.product_name} • Tồn: ${match.data.quantity} ${match.data.unit}`);
+      } else {
+        showToast('Mã thẻ chưa gán', `Thẻ "${tag}" chưa được liên kết với sản phẩm hoặc thùng nào`, false);
+      }
+      loadRfidLogs();
+    }
+  } catch (e) {
+    showToast('Lỗi quét RFID', e.message, false);
+  }
+}
+
+function openRfidScanModal() {
+  document.getElementById('modal-rfid-scan').classList.remove('hidden');
+  const results = document.getElementById('rfid-bulk-results-container');
+  if (results) results.classList.add('hidden');
+}
+
+function closeRfidScanModal() {
+  document.getElementById('modal-rfid-scan').classList.add('hidden');
+}
+
+function fillSampleRfidTags() {
+  const area = document.getElementById('rfid-bulk-tags-input');
+  if (area) {
+    area.value = 'E28011606000020420000001\nRFID-HH-01\nRFID-CP-02\nRFID-TIG-01\nRFID-UNKNOWN-999';
+  }
+}
+
+async function submitBulkRfidScan() {
+  const area = document.getElementById('rfid-bulk-tags-input');
+  const purpose = document.getElementById('rfid-scan-purpose')?.value || 'INSPECTION';
+  const text = area?.value.trim() || '';
+
+  if (!text) {
+    showToast('Danh sách trống', 'Vui lòng nhập ít nhất 1 mã thẻ RFID!', false);
+    return;
+  }
+
+  const tags = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  try {
+    const res = await apiFetch('/api/rfid/scan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tags, scan_type: purpose })
+    });
+    const result = await res.json();
+
+    if (result.success) {
+      const container = document.getElementById('rfid-bulk-results-container');
+      const stats = document.getElementById('rfid-bulk-stats');
+      const list = document.getElementById('rfid-bulk-results-list');
+
+      container.classList.remove('hidden');
+      stats.textContent = `Đã nhận diện: ${result.matched} / ${result.total_scanned} thẻ`;
+
+      list.innerHTML = result.data.map(item => {
+        if (item.found) {
+          return `
+            <div class="p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-xs flex items-center justify-between">
+              <div>
+                <span class="font-bold text-emerald-800">${item.data.product_name}</span>
+                <span class="text-emerald-600 font-mono text-[10px] ml-1">(${item.tag})</span>
+              </div>
+              <span class="font-bold text-emerald-800">${item.data.quantity} ${item.data.unit}</span>
+            </div>
+          `;
+        } else {
+          return `
+            <div class="p-2 rounded-lg bg-rose-50 border border-rose-200 text-xs flex items-center justify-between">
+              <span class="text-rose-700 font-mono">${item.tag}</span>
+              <span class="text-rose-600 text-[11px]">Chưa đăng ký</span>
+            </div>
+          `;
+        }
+      }).join('');
+
+      showToast('Quét RFID hoàn tất', `Nhận diện ${result.matched} sản phẩm/thùng hàng`);
+      loadRfidLogs();
+      loadInventory();
+      loadDashboard();
+    }
+  } catch (e) {
+    showToast('Lỗi quét RFID hàng loạt', e.message, false);
+  }
+}
+
