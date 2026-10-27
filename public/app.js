@@ -421,7 +421,7 @@ async function loadAiQuickSummary() {
       aiAnalysisData = result.data;
       const summaryEl = document.getElementById('dashboard-ai-summary');
       if (summaryEl) {
-        summaryEl.textContent = `💡 ${result.data.ai_message} (Điểm sức khỏe kho: ${result.data.health_score}/100)`;
+        summaryEl.textContent = `${result.data.ai_message} (Điểm sức khỏe kho: ${Math.round(result.data.health_score || 0)}/100)`;
       }
     }
   } catch (e) {
@@ -2039,19 +2039,48 @@ async function openAiCopilotModal() {
       content.classList.remove('hidden');
 
       const d = result.data;
-      document.getElementById('ai-health-score').textContent = `${d.health_score}/100`;
+      const score = Math.round(d.health_score || 0);
+      document.getElementById('ai-health-score').textContent = `${score}/100`;
+
+      const statusEl = document.getElementById('ai-health-status');
+      if (statusEl) {
+        if (score >= 80) {
+          statusEl.className = 'px-3 py-1 rounded-full text-xs font-semibold apple-badge-safe';
+          statusEl.textContent = 'Kho vận hành tối ưu';
+        } else if (score >= 50) {
+          statusEl.className = 'px-3 py-1 rounded-full text-xs font-semibold apple-badge-warning';
+          statusEl.textContent = 'Cần lưu ý bổ sung & đảo date';
+        } else {
+          statusEl.className = 'px-3 py-1 rounded-full text-xs font-semibold apple-badge-danger';
+          statusEl.textContent = 'Nguy cơ thiếu hàng / Cận hạn';
+        }
+      }
+
+      const msgEl = document.getElementById('ai-modal-main-message');
+      if (msgEl) {
+        msgEl.textContent = d.ai_message || '';
+      }
 
       const list = document.getElementById('ai-suggestions-list');
       if (d.recommendations && d.recommendations.length > 0) {
-        list.innerHTML = d.recommendations.map(r => `
-          <div class="p-3 rounded-xl border border-[#E5E5EA] bg-[#F9F9FA] space-y-1">
-            <div class="font-bold text-[#1D1D1F] flex items-center gap-1.5">
-              <span>💡</span>
-              <span>${r.title || r.action}</span>
+        list.innerHTML = d.recommendations.map(r => {
+          let badgeColorClass = 'bg-slate-100 text-slate-800 border-slate-200';
+          if (r.color === 'rose') badgeColorClass = 'bg-rose-50 text-rose-700 border-rose-200';
+          else if (r.color === 'amber') badgeColorClass = 'bg-amber-50 text-amber-800 border-amber-200';
+          else if (r.color === 'emerald') badgeColorClass = 'bg-emerald-50 text-emerald-800 border-emerald-200';
+          else if (r.color === 'sky') badgeColorClass = 'bg-sky-50 text-sky-700 border-sky-200';
+
+          return `
+            <div class="p-3.5 rounded-xl border border-black/[0.06] bg-[#F9F9FA] space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="px-2 py-0.5 rounded-md text-[10px] font-bold border uppercase tracking-wider ${badgeColorClass}">
+                  ${r.badge || 'KHUYẾN NGHỊ'}
+                </span>
+              </div>
+              <div class="text-[#1D1D1F] text-xs leading-relaxed font-medium">${r.text || r.detail || ''}</div>
             </div>
-            <div class="text-[#86868B] text-[11px] leading-relaxed">${r.detail || r.reason}</div>
-          </div>
-        `).join('');
+          `;
+        }).join('');
       } else {
         list.innerHTML = `<div class="text-xs text-[#86868B] py-3 text-center">Kho hàng đang được vận hành rất chuẩn xác và tối ưu!</div>`;
       }
